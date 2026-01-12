@@ -148,3 +148,60 @@ On first launch, lazy.nvim will auto-install all plugins. Then Mason will instal
 | `>` | Indent right (stay in visual) |
 | `J` | Move selected lines down |
 | `K` | Move selected lines up |
+
+
+## Tmux Configuration
+
+```
+tmux/
+└── .tmux.conf
+```
+
+### To activate
+
+```bash
+ln -s ~/projects/configs/tmux/.tmux.conf ~/.tmux.conf
+```
+
+### Features
+
+- Prefix key: `Ctrl+a` (instead of default `Ctrl+b`)
+- Vi mode enabled
+- Mouse support
+- 10000 line scrollback history
+- Windows/panes start at index 1
+
+### Plugins (via TPM)
+
+| Plugin | Description |
+|--------|-------------|
+| **tpm** | Tmux Plugin Manager |
+| **tmux-sensible** | Sensible defaults |
+| **tmux-resurrect** | Save/restore sessions |
+| **tmux-copycat** | Enhanced search |
+
+### Key bindings
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+a` | Prefix (send with `Ctrl+a Ctrl+a`) |
+| `Prefix r` | Reload config |
+| `Prefix v` | Split vertically |
+| `Prefix h` | Split horizontally |
+| `Prefix T` | Move window to position 1 |
+
+### Pane Navigation
+
+| Key | Action |
+|-----|--------|
+| `Alt+Left` | Select pane left |
+| `Alt+Right` | Select pane right |
+| `Alt+Up` | Select pane up |
+| `Alt+Down` | Select pane down |
+
+### Window Navigation
+
+| Key | Action |
+|-----|--------|
+| `F1` | Previous window |
+| `F2` | Next window |
