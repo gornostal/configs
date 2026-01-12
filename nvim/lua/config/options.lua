@@ -1,9 +1,9 @@
 -- Basic Neovim options
 local opt = vim.opt
 
--- Line numbers
-opt.number = true
-opt.relativenumber = true
+-- Line numbers (hidden by default, toggle with <leader>g)
+opt.number = false
+opt.relativenumber = false
 
 -- Tabs & indentation
 opt.tabstop = 4
@@ -19,7 +19,7 @@ opt.incsearch = true
 
 -- Appearance
 opt.termguicolors = true
-opt.signcolumn = "yes"
+opt.signcolumn = "no"
 opt.cursorline = true
 
 -- Behavior
