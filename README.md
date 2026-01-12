@@ -1,5 +1,12 @@
 # My configs
 
+This project contains configs for apps that run via CLI.
+
+## Instructions
+
+When doing any significant modifications, change this file also.
+
+
 ## Neovim Configuration
 
 ```
@@ -57,6 +64,7 @@ On first launch, lazy.nvim will auto-install all plugins. Then Mason will instal
 | `<Esc>` | Clear search highlight |
 | `<leader>w` | Toggle line wrap |
 | `<leader>g` | Toggle gutter (line numbers + sign column) |
+| `<leader>bd` | Delete current buffer |
 
 ### Window Navigation
 
@@ -100,6 +108,13 @@ On first launch, lazy.nvim will auto-install all plugins. Then Mason will instal
 | `<leader>hs` | Stage hunk |
 | `<leader>hr` | Reset hunk |
 | `<leader>hd` | Diff this |
+
+### Git Diff
+
+| Key | Action |
+|-----|--------|
+| `<leader>diff` | Show unstaged changes (git diff) |
+| `<leader>dic` | Show staged changes (git diff --cached) |
 
 ### Autocompletion
 

@@ -29,7 +29,7 @@ opt.mouse = "a"
 opt.clipboard = "unnamedplus"
 opt.undofile = true
 opt.updatetime = 250
-opt.timeoutlen = 300
+opt.timeoutlen = 1000
 
 -- Completion
 opt.completeopt = "menu,menuone,noselect"
