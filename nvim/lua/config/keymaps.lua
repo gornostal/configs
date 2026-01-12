@@ -37,40 +37,28 @@ keymap("n", "<leader>g", function()
   end
 end, { desc = "Toggle gutter", silent = true })
 
--- Git diff helpers
-local function show_git_diff(cmd, title)
+-- Git diff in a scratch buffer
+local function show_diff(cmd, title)
   local output = vim.fn.systemlist(cmd)
-  if vim.v.shell_error ~= 0 and #output == 0 then
-    vim.notify("Not a git repository or no changes", vim.log.levels.WARN)
+  if #output == 0 then
+    vim.notify("No changes", vim.log.levels.INFO)
     return
-  end
-  -- Add separator between file sections
-  local formatted = {}
-  local separator = string.rep("━", 60)
-  for i, line in ipairs(output) do
-    if line:match("^diff %-%-git ") and i > 1 then
-      table.insert(formatted, "")
-      table.insert(formatted, separator)
-      table.insert(formatted, "")
-    end
-    table.insert(formatted, line)
   end
   vim.cmd("enew")
   vim.bo.buftype = "nofile"
   vim.bo.bufhidden = "wipe"
-  vim.bo.swapfile = false
   vim.bo.filetype = "diff"
   vim.api.nvim_buf_set_name(0, title)
-  vim.api.nvim_buf_set_lines(0, 0, -1, false, formatted)
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, output)
   vim.bo.modifiable = false
 end
 
--- Show changed and untracked files (unstaged changes)
+-- Unstaged changes + new files
 keymap("n", "<leader>diff", function()
-  show_git_diff("git diff", "[Git Diff - Unstaged]")
-end, { desc = "Git diff (unstaged changes)", silent = true })
+  show_diff("git diff && git ls-files --others --exclude-standard | xargs -I{} git diff --no-index /dev/null {} 2>/dev/null", "[Git Diff]")
+end, { desc = "Git diff (unstaged + new)", silent = true })
 
--- Show staged file changes
+-- Staged changes
 keymap("n", "<leader>dic", function()
-  show_git_diff("git diff --cached", "[Git Diff - Staged]")
-end, { desc = "Git diff (staged changes)", silent = true })
+  show_diff("git diff --cached", "[Git Diff - Staged]")
+end, { desc = "Git diff (staged)", silent = true })
