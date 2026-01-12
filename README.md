@@ -1,0 +1,135 @@
+# My configs
+
+## Neovim Configuration
+
+```
+nvim/
+├── init.lua              # Entry point
+├── lua/
+│   ├── config/
+│   │   ├── options.lua   # Basic settings (line numbers, tabs, etc.)
+│   │   └── keymaps.lua   # Key bindings
+│   └── plugins/
+│       └── init.lua      # All plugins (LSP, completion, theme)
+└── .gitignore
+```
+
+## To activate this config
+
+Symlink it to Neovim's config location:
+
+```bash
+ln -s ~/projects/configs/nvim ~/.config/nvim
+```
+
+Then start Neovim:
+
+```bash
+nvim
+```
+
+On first launch, lazy.nvim will auto-install all plugins. Then Mason will install the language servers (pyright for Python, omnisharp for .NET).
+
+## Plugins included
+
+| Plugin | Description |
+|--------|-------------|
+| **lazy.nvim** | Plugin manager |
+| **catppuccin** | Color scheme (mocha flavor) |
+| **copilot.vim** | GitHub Copilot AI code completion |
+| **neoscroll.nvim** | Smooth scrolling animations |
+| **telescope.nvim** | Fuzzy finder for files, grep, buffers |
+| **gitsigns.nvim** | Git change indicators in the gutter |
+| **mason.nvim** | Language server installer |
+| **mason-lspconfig.nvim** | Auto-configures LSP servers from Mason |
+| **nvim-lspconfig** | LSP configuration |
+| **nvim-cmp** | Autocompletion engine |
+| **LuaSnip** | Snippet engine |
+
+## Key bindings
+
+`Space` is the leader key.
+
+### General
+
+| Key | Action |
+|-----|--------|
+| `<Esc>` | Clear search highlight |
+| `<leader>w` | Toggle line wrap |
+| `<leader>g` | Toggle gutter (line numbers + sign column) |
+
+### Window Navigation
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+h` | Move to left window |
+| `Ctrl+j` | Move to lower window |
+| `Ctrl+k` | Move to upper window |
+| `Ctrl+l` | Move to right window |
+
+### LSP (Language Server)
+
+| Key | Action |
+|-----|--------|
+| `gd` | Go to definition |
+| `gD` | Go to declaration |
+| `gr` | Find references |
+| `gi` | Go to implementation |
+| `K` | Show hover documentation |
+| `<leader>rn` | Rename symbol |
+| `<leader>ca` | Code actions |
+| `<leader>f` | Format file |
+
+### Telescope (Fuzzy Finder)
+
+| Key | Action |
+|-----|--------|
+| `<leader>ff` | Find files |
+| `<leader>fg` | Live grep (search in files) |
+| `<leader>fb` | Find open buffers |
+| `<leader>fh` | Search help tags |
+| `<leader>fr` | Recent files |
+
+### Git (Gitsigns)
+
+| Key | Action |
+|-----|--------|
+| `]h` | Next hunk |
+| `[h` | Previous hunk |
+| `<leader>hp` | Preview hunk |
+| `<leader>hs` | Stage hunk |
+| `<leader>hr` | Reset hunk |
+| `<leader>hd` | Diff this |
+
+### Autocompletion
+
+| Key | Action |
+|-----|--------|
+| `Tab` | Next completion item / expand snippet |
+| `Shift+Tab` | Previous completion item |
+| `Enter` | Accept completion |
+| `Ctrl+Space` | Trigger completion manually |
+| `Ctrl+e` | Abort completion |
+| `Ctrl+b` | Scroll docs up |
+| `Ctrl+f` | Scroll docs down |
+
+### Smooth Scrolling
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+u` | Scroll up (half page) |
+| `Ctrl+d` | Scroll down (half page) |
+| `Ctrl+b` | Scroll up (full page) |
+| `Ctrl+f` | Scroll down (full page) |
+| `zt` | Scroll cursor to top |
+| `zz` | Scroll cursor to center |
+| `zb` | Scroll cursor to bottom |
+
+### Visual Mode
+
+| Key | Action |
+|-----|--------|
+| `<` | Indent left (stay in visual) |
+| `>` | Indent right (stay in visual) |
+| `J` | Move selected lines down |
+| `K` | Move selected lines up |
