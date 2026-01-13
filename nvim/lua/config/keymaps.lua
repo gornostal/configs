@@ -55,3 +55,6 @@ end, { desc = "Git diff (unstaged + new)", silent = true })
 keymap("n", "<leader>dic", function()
   show_diff("git diff --cached", "[Git Diff - Staged]")
 end, { desc = "Git diff (staged)", silent = true })
+
+-- Git status (jump to changed files)
+keymap("n", "<leader>gs", "<cmd>Telescope git_status<CR>", { desc = "Git status", silent = true })

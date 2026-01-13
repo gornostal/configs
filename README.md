@@ -121,6 +121,7 @@ On first launch, lazy.nvim will auto-install all plugins. Then Mason will instal
 
 | Key | Action |
 |-----|--------|
+| `<leader>gs` | Git status (fuzzy find changed files) |
 | `<leader>diff` | Show unstaged changes + new files |
 | `<leader>dic` | Show staged changes (git diff --cached) |
 
