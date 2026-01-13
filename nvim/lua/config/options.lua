@@ -19,7 +19,7 @@ opt.incsearch = true
 
 -- Appearance
 opt.termguicolors = true
-opt.signcolumn = "no"
+opt.signcolumn = "yes"
 opt.cursorline = true
 
 -- Behavior

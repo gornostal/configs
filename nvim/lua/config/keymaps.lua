@@ -24,18 +24,11 @@ keymap("n", "<leader>w", ":set wrap!<CR>", { desc = "Toggle line wrap", silent =
 -- Close current buffer
 keymap("n", "<leader>bd", ":bd<CR>", { desc = "Delete buffer", silent = true })
 
--- Toggle gutter (sign column and line numbers)
+-- Toggle line numbers (sign column stays visible for git signs)
 keymap("n", "<leader>g", function()
-  if vim.o.signcolumn == "yes" then
-    vim.o.signcolumn = "no"
-    vim.o.number = false
-    vim.o.relativenumber = false
-  else
-    vim.o.signcolumn = "yes"
-    vim.o.number = true
-    vim.o.relativenumber = true
-  end
-end, { desc = "Toggle gutter", silent = true })
+  vim.o.number = not vim.o.number
+  vim.o.relativenumber = not vim.o.relativenumber
+end, { desc = "Toggle line numbers", silent = true })
 
 -- Git diff in a scratch buffer
 local function show_diff(cmd, title)

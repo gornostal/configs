@@ -71,7 +71,7 @@ On first launch, lazy.nvim will auto-install all plugins. Then Mason will instal
 |-----|--------|
 | `<Esc>` | Clear search highlight |
 | `<leader>w` | Toggle line wrap |
-| `<leader>g` | Toggle gutter (line numbers + sign column) |
+| `<leader>g` | Toggle line numbers (git signs stay visible) |
 | `<leader>bd` | Delete current buffer |
 
 ### Window Navigation
