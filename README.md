@@ -6,6 +6,14 @@ This project contains configs for apps that run via CLI.
 
 When doing any significant modifications, change this file also.
 
+## Setup Script
+
+```
+setup.sh
+```
+
+Links the Neovim and Tmux configs into their standard locations if they are not already present.
+
 
 ## Neovim Configuration
 
