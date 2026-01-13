@@ -104,6 +104,7 @@ On first launch, lazy.nvim will auto-install all plugins. Then Mason will instal
 | `<leader>fg` | Live grep (search in files) |
 | `<leader>fb` | Find open buffers |
 | `<leader>fh` | Search help tags |
+| `<leader>fk` | Find keymaps |
 | `<leader>fr` | Recent files |
 
 ### Git (Gitsigns)
@@ -196,8 +197,10 @@ ln -s ~/projects/configs/tmux/.tmux.conf ~/.tmux.conf
 | `Ctrl+a` | Prefix (send with `Ctrl+a Ctrl+a`) |
 | `Prefix r` | Reload config |
 | `Prefix v` | Split vertically |
-| `Prefix h` | Split horizontally |
+| `Prefix s` | Split horizontally |
 | `Prefix T` | Move window to position 1 |
+| `Prefix j` | Scroll down (page) |
+| `Prefix k` | Scroll up (page) |
 
 ### Pane Navigation
 
@@ -214,3 +217,5 @@ ln -s ~/projects/configs/tmux/.tmux.conf ~/.tmux.conf
 |-----|--------|
 | `F1` | Previous window |
 | `F2` | Next window |
+| `Prefix h` | Previous window |
+| `Prefix l` | Next window |

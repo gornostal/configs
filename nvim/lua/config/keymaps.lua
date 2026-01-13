@@ -58,3 +58,6 @@ end, { desc = "Git diff (staged)", silent = true })
 
 -- Git status (jump to changed files)
 keymap("n", "<leader>gs", "<cmd>Telescope git_status<CR>", { desc = "Git status", silent = true })
+
+-- Find all keymaps
+keymap("n", "<leader>fk", "<cmd>Telescope keymaps<CR>", { desc = "Find keymaps", silent = true })
