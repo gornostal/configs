@@ -68,6 +68,13 @@ return {
     end,
   },
 
+  -- Treesitter: better syntax highlighting and code understanding
+  {
+    "nvim-treesitter/nvim-treesitter",
+    lazy = false,
+    build = ":TSUpdate",
+  },
+
   -- Colorscheme
   {
     "catppuccin/nvim",

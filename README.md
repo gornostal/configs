@@ -60,6 +60,7 @@ On first launch, lazy.nvim will auto-install all plugins. Then Mason will instal
 | **nvim-lspconfig** | LSP configuration |
 | **nvim-cmp** | Autocompletion engine |
 | **LuaSnip** | Snippet engine |
+| **nvim-treesitter** | Syntax highlighting and code parsing |
 | **roslyn.nvim** | Roslyn LSP for .NET with Razor/CSHTML support |
 
 ## Key bindings
