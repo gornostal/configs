@@ -4,6 +4,15 @@ return {
     "github/copilot.vim",
   },
 
+  -- Roslyn LSP for .NET (includes Razor/CSHTML support)
+  {
+    "seblyng/roslyn.nvim",
+    ft = { "cs", "razor", "cshtml" },
+    config = function()
+      require("roslyn").setup({})
+    end,
+  },
+
   -- Smooth scrolling
   {
     "karb94/neoscroll.nvim",
