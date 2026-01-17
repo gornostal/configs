@@ -54,6 +54,7 @@ On first launch, lazy.nvim will auto-install all plugins. Then Mason will instal
 | **copilot.vim** | GitHub Copilot AI code completion |
 | **neoscroll.nvim** | Smooth scrolling animations |
 | **telescope.nvim** | Fuzzy finder for files, grep, buffers |
+| **flash.nvim** | Quick jumps with labels |
 | **gitsigns.nvim** | Git change indicators in the gutter |
 | **mason.nvim** | Language server installer |
 | **mason-lspconfig.nvim** | Auto-configures LSP servers from Mason |
@@ -119,6 +120,16 @@ On first launch, lazy.nvim will auto-install all plugins. Then Mason will instal
 | `<leader>hs` | Stage hunk |
 | `<leader>hr` | Reset hunk |
 | `<leader>hd` | Diff this |
+
+### Flash
+
+| Key | Action |
+|-----|--------|
+| `s` | Flash jump |
+| `S` | Flash Treesitter |
+| `r` | Remote Flash (operator-pending) |
+| `R` | Treesitter search |
+| `Ctrl+s` | Toggle Flash search (command-line) |
 
 ### Git Diff
 
