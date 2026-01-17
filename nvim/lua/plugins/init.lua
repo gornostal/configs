@@ -4,15 +4,6 @@ return {
     "github/copilot.vim",
   },
 
-  -- Roslyn LSP for .NET (includes Razor/CSHTML support)
-  {
-    "seblyng/roslyn.nvim",
-    ft = { "cs", "razor", "cshtml" },
-    config = function()
-      require("roslyn").setup({})
-    end,
-  },
-
   -- Smooth scrolling
   {
     "karb94/neoscroll.nvim",
@@ -31,7 +22,6 @@ return {
   -- Fuzzy finder
   {
     "nvim-telescope/telescope.nvim",
-    branch = "0.1.x",
     dependencies = {
       "nvim-lua/plenary.nvim",
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
@@ -97,7 +87,15 @@ return {
     "williamboman/mason.nvim",
     build = ":MasonUpdate",
     config = function()
-      require("mason").setup()
+      require("mason").setup({
+        ensure_installed = {
+          "roslyn", -- .NET (custom registry)
+        },
+        registries = {
+          "github:mason-org/mason-registry",
+          "github:Crashdummyy/mason-registry",
+        },
+      })
     end,
   },
 
@@ -109,7 +107,6 @@ return {
       require("mason-lspconfig").setup({
         ensure_installed = {
           "pyright",   -- Python
-          "omnisharp", -- C# / .NET
         },
         automatic_installation = true,
       })
@@ -127,17 +124,12 @@ return {
       vim.lsp.config["pyright"] = {
         capabilities = capabilities,
       }
-
-      vim.lsp.config["omnisharp"] = {
+      vim.lsp.config["roslyn"] = {
         capabilities = capabilities,
-        settings = {
-          RoslynExtensionsOptions = { EnableAnalyzersSupport = true },
-          FormattingOptions = { OrganizeImports = true },
-        },
       }
 
       -- Enable configured servers
-      vim.lsp.enable({ "pyright", "omnisharp" })
+      vim.lsp.enable({ "pyright", "roslyn" })
 
       -- Keymaps for LSP (activate when LSP attaches to buffer)
       vim.api.nvim_create_autocmd("LspAttach", {
