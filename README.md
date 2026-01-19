@@ -230,5 +230,7 @@ ln -s ~/projects/configs/tmux/.tmux.conf ~/.tmux.conf
 |-----|--------|
 | `F1` | Previous window |
 | `F2` | Next window |
+| `Alt+1`..`Alt+9` | Go to window 1-9 |
+| `Alt+0` | Go to window 10 |
 | `Prefix h` | Previous window |
 | `Prefix l` | Next window |
