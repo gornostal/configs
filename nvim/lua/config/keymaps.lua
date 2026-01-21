@@ -61,3 +61,6 @@ keymap("n", "<leader>gs", "<cmd>Telescope git_status<CR>", { desc = "Git status"
 
 -- Find all keymaps
 keymap("n", "<leader>fk", "<cmd>Telescope keymaps<CR>", { desc = "Find keymaps", silent = true })
+
+-- View diagnostics for current file
+keymap("n", "<leader>dd", vim.diagnostic.setloclist, { desc = "Show diagnostics", silent = true })
