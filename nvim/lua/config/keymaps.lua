@@ -25,7 +25,7 @@ keymap("n", "<leader>w", ":set wrap!<CR>", { desc = "Toggle line wrap", silent =
 keymap("n", "<leader>bd", ":bd<CR>", { desc = "Delete buffer", silent = true })
 
 -- Toggle line numbers (sign column stays visible for git signs)
-keymap("n", "<leader>g", function()
+keymap("n", "<leader>tg", function()
   vim.o.number = not vim.o.number
   vim.o.relativenumber = not vim.o.relativenumber
 end, { desc = "Toggle line numbers", silent = true })
