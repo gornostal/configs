@@ -108,6 +108,7 @@ On first launch, lazy.nvim will auto-install all plugins. Then Mason will instal
 | `<leader>fb` | Find open buffers |
 | `<leader>fh` | Search help tags |
 | `<leader>fk` | Find keymaps |
+| `<leader>fp` | Print full file path |
 | `<leader>fr` | Recent files |
 
 ### Git (Gitsigns)
