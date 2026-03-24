@@ -13,7 +13,7 @@ function fish_prompt
         end
 
         function _is_git_dirty
-            git status --porcelain 2>/dev/null | read -l _
+            git status --porcelain 2>/dev/null | read -l __git_status_out
         end
 
         function _is_git_repo
