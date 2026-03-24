@@ -213,6 +213,7 @@ ln -s ~/projects/configs/tmux/.tmux.conf ~/.tmux.conf
 | `Prefix v` | Split vertically |
 | `Prefix s` | Split horizontally |
 | `Prefix T` | Move window to position 1 |
+| `Prefix C-g` | Fuzzy insert path from dir history (works in any app) |
 | `Prefix j` | Scroll down (page) |
 | `Prefix k` | Scroll up (page) |
 
