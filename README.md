@@ -12,7 +12,7 @@ When doing any significant modifications, change this file also.
 setup.sh
 ```
 
-Links the Neovim and Tmux configs into their standard locations if they are not already present.
+Links the Neovim, Tmux, and Fish configs into their standard locations if they are not already present.
 
 
 ## Neovim Configuration
@@ -235,3 +235,43 @@ ln -s ~/projects/configs/tmux/.tmux.conf ~/.tmux.conf
 | `Alt+0` | Go to window 10 |
 | `Prefix h` | Previous window |
 | `Prefix l` | Next window |
+
+
+## Fish Configuration
+
+```
+fish/
+├── config.fish          # Main config: PATH, abbreviations, aliases, env vars
+├── conf.d/
+│   ├── omf.fish         # Oh My Fish loader
+│   └── rustup.fish      # Cargo/Rust env
+└── functions/
+    ├── fcd.fish         # Fuzzy cd from dir history (Ctrl+g)
+    ├── fish_prompt.fish # Custom prompt with git/hg branch and dirty indicator
+    └── __log_dir.fish   # Logs every visited dir to dir_history on PWD change
+```
+
+### To activate
+
+```bash
+ln -s ~/projects/configs/fish/config.fish ~/.config/fish/config.fish
+ln -s ~/projects/configs/fish/functions/fcd.fish ~/.config/fish/functions/fcd.fish
+ln -s ~/projects/configs/fish/functions/fish_prompt.fish ~/.config/fish/functions/fish_prompt.fish
+ln -s ~/projects/configs/fish/conf.d/omf.fish ~/.config/fish/conf.d/omf.fish
+ln -s ~/projects/configs/fish/conf.d/rustup.fish ~/.config/fish/conf.d/rustup.fish
+```
+
+Or run `setup.sh`.
+
+### Notable abbreviations / aliases
+
+| Abbr/Alias | Expands to |
+|------------|-----------|
+| `gs` | `git status` |
+| `ss` / `sp` | `git stash save -u` / `git stash pop` |
+| `d` / `dc` / `dps` | docker / docker compose / docker ps |
+| `k` / `kl` | kubectl / kubectl logs |
+| `dn` | dotnet |
+| `cv` | `claude --dangerously-skip-permissions` |
+| `l` | `ls -lA` |
+| `Ctrl+g` | `fcd` — fuzzy jump to dir from history |
