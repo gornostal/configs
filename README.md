@@ -219,6 +219,7 @@ ln -s ~/projects/configs/tmux/.tmux.conf ~/.tmux.conf
 | `Prefix j` | Scroll down (page) |
 | `Prefix k` | Scroll up (page) |
 | `Alt+z` | Zoom/unzoom current pane (no prefix) |
+| `Alt+s` | Enter copy mode and search backward (no prefix) |
 
 ### Pane Navigation
 
