@@ -275,6 +275,7 @@ Or run `setup.sh`.
 | `d` / `dc` / `dps` | docker / docker compose / docker ps |
 | `k` / `kl` | kubectl / kubectl logs |
 | `dn` | dotnet |
+| `v` | `nvim` |
 | `cv` | `claude --dangerously-skip-permissions` |
 | `l` | `ls -lA` |
 | `Ctrl+g` | `fcd` — fuzzy jump to dir from history |

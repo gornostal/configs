@@ -6,6 +6,7 @@ abbr r "rsync -poghb --backup-dir=/tmp/rsync -e /dev/null --progress"
 abbr op "xdg-open"
 abbr hserver "python3 -m http.server"
 abbr l 'ls -lA'
+abbr v nvim
 abbr weather "curl wttr.in"
 
 alias G 'grep -E -i --color'
