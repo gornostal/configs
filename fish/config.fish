@@ -66,4 +66,5 @@ abbr tip turnip
 set -gx AWS_PROFILE default-mfa
 
 # Dir history (absolute paths, persistent)
+source ~/.config/fish/functions/__log_dir.fish
 bind \cg 'fcd; commandline -f repaint'
