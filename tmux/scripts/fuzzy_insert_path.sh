@@ -7,7 +7,10 @@
 
 result=$(cat ~/.local/share/fish/dir_history \
   | sort -u \
-  | while IFS= read -r d; do [ -d "$d" ] && echo "$d"; done \
+  | while IFS= read -r d; do
+      expanded="${d/#\~/$HOME}"
+      [ -d "$expanded" ] && echo "$d"
+    done \
   | fzf --tmux --expect=tab --prompt="dir: ")
 
 key=$(echo "$result" | head -1)

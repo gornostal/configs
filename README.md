@@ -215,7 +215,7 @@ ln -s ~/projects/configs/tmux/.tmux.conf ~/.tmux.conf
 | `Prefix v` | Split vertically |
 | `Prefix h` | Split horizontally |
 | `Prefix T` | Move window to position 1 |
-| `Prefix C-g` | Fuzzy insert path from dir history — Enter inserts dir, Tab opens file picker under selected dir |
+| `Alt+c` | Fuzzy insert path from dir history — Enter inserts dir, Tab opens file picker under selected dir (no prefix) |
 | `Prefix j` | Scroll down (page) |
 | `Prefix k` | Scroll up (page) |
 | `Alt+z` | Zoom/unzoom current pane (no prefix) |
