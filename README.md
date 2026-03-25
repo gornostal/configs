@@ -178,7 +178,9 @@ On first launch, lazy.nvim will auto-install all plugins. Then Mason will instal
 
 ```
 tmux/
-└── .tmux.conf
+├── .tmux.conf
+└── scripts/
+    └── fuzzy_insert_path.sh  # Two-step fuzzy insert: dir picker, optional file picker (Tab)
 ```
 
 ### To activate
@@ -213,7 +215,7 @@ ln -s ~/projects/configs/tmux/.tmux.conf ~/.tmux.conf
 | `Prefix v` | Split vertically |
 | `Prefix s` | Split horizontally |
 | `Prefix T` | Move window to position 1 |
-| `Prefix C-g` | Fuzzy insert path from dir history (works in any app) |
+| `Prefix C-g` | Fuzzy insert path from dir history — Enter inserts dir, Tab opens file picker under selected dir |
 | `Prefix j` | Scroll down (page) |
 | `Prefix k` | Scroll up (page) |
 

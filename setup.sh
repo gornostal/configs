@@ -21,6 +21,16 @@ else
     echo "Tmux config linked to $TMUX_CONFIG_FILE"
 fi
 
+TMUX_SCRIPTS_DIR="$HOME/.config/tmux/scripts"
+if [ -e "$TMUX_SCRIPTS_DIR" ]; then
+    echo "Tmux scripts dir already exists at $TMUX_SCRIPTS_DIR, skipping setup."
+else
+    mkdir -p "$HOME/.config/tmux"
+    ln -s "$SCRIPT_DIR/tmux/scripts" "$TMUX_SCRIPTS_DIR"
+    chmod +x "$SCRIPT_DIR"/tmux/scripts/*.sh
+    echo "Tmux scripts linked to $TMUX_SCRIPTS_DIR"
+fi
+
 mkdir -p "$FISH_CONFIG_DIR/functions" "$FISH_CONFIG_DIR/conf.d"
 
 for src in config.fish; do
