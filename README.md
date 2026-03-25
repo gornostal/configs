@@ -213,11 +213,12 @@ ln -s ~/projects/configs/tmux/.tmux.conf ~/.tmux.conf
 | `Ctrl+a` | Prefix (send with `Ctrl+a Ctrl+a`) |
 | `Prefix r` | Reload config |
 | `Prefix v` | Split vertically |
-| `Prefix s` | Split horizontally |
+| `Prefix h` | Split horizontally |
 | `Prefix T` | Move window to position 1 |
 | `Prefix C-g` | Fuzzy insert path from dir history — Enter inserts dir, Tab opens file picker under selected dir |
 | `Prefix j` | Scroll down (page) |
 | `Prefix k` | Scroll up (page) |
+| `Alt+z` | Zoom/unzoom current pane (no prefix) |
 
 ### Pane Navigation
 
@@ -236,8 +237,6 @@ ln -s ~/projects/configs/tmux/.tmux.conf ~/.tmux.conf
 | `Shift+Right` | Next window |
 | `Alt+1`..`Alt+9` | Go to window 1-9 |
 | `Alt+0` | Go to window 10 |
-| `Prefix h` | Previous window |
-| `Prefix l` | Next window |
 
 
 ## Fish Configuration
