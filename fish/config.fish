@@ -18,6 +18,7 @@ abbr NOLL 'ut -c1-200'
 
 # git
 abbr gs "git status"
+abbr ga "git add -A"
 abbr ss 'git stash save -u'
 abbr sp 'git stash pop'
 abbr c 'git checkout'
