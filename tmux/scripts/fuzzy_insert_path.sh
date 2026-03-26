@@ -19,12 +19,13 @@ dir=$(echo "$result" | tail -1)
 [ -z "$dir" ] && exit 0
 
 if [ "$key" = "tab" ]; then
+  expanded_dir="${dir/#\~/$HOME}"
   if command -v fd > /dev/null 2>&1; then
     list_files() { fd --type f --hidden --follow . "$1" 2>/dev/null | sed "s|^$1/||"; }
   else
     list_files() { find "$1" -type f -not -path '*/.git/*' -not -path '*/node_modules/*' 2>/dev/null | sed "s|^$1/||"; }
   fi
-  file=$(list_files "$dir" | fzf --tmux --prompt="file: ") || true
+  file=$(list_files "$expanded_dir" | fzf --tmux --prompt="file: ") || true
   if [ -n "$file" ]; then
     tmux send-keys -t "$1" "$dir/$file"
   else
