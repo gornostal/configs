@@ -271,6 +271,7 @@ Or run `setup.sh`.
 | Abbr/Alias | Expands to |
 |------------|-----------|
 | `gs` | `git status` |
+| `ga` | `git add -A` |
 | `ss` / `sp` | `git stash save -u` / `git stash pop` |
 | `d` / `dc` / `dps` | docker / docker compose / docker ps |
 | `k` / `kl` | kubectl / kubectl logs |
