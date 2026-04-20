@@ -42,6 +42,10 @@ abbr ddi 'sudo docker rmi (sudo docker images -q -f dangling=true)' # delete dan
 abbr ddv 'sudo docker volume rm (sudo docker volume ls -q -f dangling=true)' # delete dangling volumes
 abbr dst 'sudo docker stats --format "table {{.Name}}\t{{.Container}}\t{{.CPUPerc}}"'
 
+# Podman
+abbr p 'podman'
+abbr pc 'podman compose'
+
 # kubens autocompletion
 abbr k 'kubectl'
 abbr kl 'kubectl logs -f --tail=300'

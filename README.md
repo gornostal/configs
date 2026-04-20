@@ -274,6 +274,7 @@ Or run `setup.sh`.
 | `ga` | `git add -A` |
 | `ss` / `sp` | `git stash save -u` / `git stash pop` |
 | `d` / `dc` / `dps` | docker / docker compose / docker ps |
+| `p` / `pc` | podman / podman compose |
 | `k` / `kl` | kubectl / kubectl logs |
 | `dn` | dotnet |
 | `v` | `nvim` |
