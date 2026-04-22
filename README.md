@@ -278,6 +278,6 @@ Or run `setup.sh`.
 | `k` / `kl` | kubectl / kubectl logs |
 | `dn` | dotnet |
 | `v` | `nvim` |
-| `cv` | `claude --dangerously-skip-permissions` |
+| `cv` | `claude` |
 | `l` | `ls -lA` |
 | `Ctrl+g` | `fcd` — fuzzy jump to dir from history |

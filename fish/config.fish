@@ -64,7 +64,7 @@ set -gx DENO_INSTALL ~/.deno
 
 # AI
 abbr x "codex -s danger-full-access"
-abbr cv "claude --dangerously-skip-permissions"
+abbr cv "claude"
 abbr cop "copilot --disable-builtin-mcps --allow-all-paths --allow-all-tools"
 
 # Turnip
