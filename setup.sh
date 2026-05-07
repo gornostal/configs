@@ -3,9 +3,19 @@
 NVIM_CONFIG_DIR="$HOME/.config/nvim"
 TMUX_CONFIG_FILE="$HOME/.tmux.conf"
 FISH_CONFIG_DIR="$HOME/.config/fish"
+CLAUDE_CONFIG_DIR="$HOME/.claude"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 mkdir -p "$HOME/.config"
+mkdir -p "$CLAUDE_CONFIG_DIR"
+
+CLAUDE_COMMANDS_DIR="$CLAUDE_CONFIG_DIR/commands"
+if [ -e "$CLAUDE_COMMANDS_DIR" ]; then
+    echo "Claude commands already exist at $CLAUDE_COMMANDS_DIR, skipping setup."
+else
+    ln -s "$SCRIPT_DIR/claude-code/commands" "$CLAUDE_COMMANDS_DIR"
+    echo "Claude commands linked to $CLAUDE_COMMANDS_DIR"
+fi
 
 if [ -e "$NVIM_CONFIG_DIR" ]; then
     echo "Neovim config already exists at $NVIM_CONFIG_DIR, skipping setup."

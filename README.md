@@ -6,13 +6,13 @@ This project contains configs for apps that run via CLI.
 
 When doing any significant modifications, change this file also.
 
-## Setup Script
+## Activation
 
-```
-setup.sh
-```
+Run `setup.sh` to activate all configs. It symlinks the Neovim, Tmux, Fish, and Claude Code configs into their standard locations, skipping any that already exist.
 
-Links the Neovim, Tmux, and Fish configs into their standard locations if they are not already present.
+```bash
+./setup.sh
+```
 
 
 ## Neovim Configuration
@@ -29,21 +29,7 @@ nvim/
 └── .gitignore
 ```
 
-## To activate this config
-
-Symlink it to Neovim's config location:
-
-```bash
-ln -s ~/projects/configs/nvim ~/.config/nvim
-```
-
-Then start Neovim:
-
-```bash
-nvim
-```
-
-On first launch, lazy.nvim will auto-install all plugins. Then Mason will install the language servers (pyright for Python, omnisharp for .NET).
+On first launch of Neovim, lazy.nvim will auto-install all plugins. Then Mason will install the language servers (pyright for Python, omnisharp for .NET).
 
 ## Plugins included
 
@@ -183,12 +169,6 @@ tmux/
     └── fuzzy_insert_path.sh  # Two-step fuzzy insert: dir picker, optional file picker (Tab)
 ```
 
-### To activate
-
-```bash
-ln -s ~/projects/configs/tmux/.tmux.conf ~/.tmux.conf
-```
-
 ### Features
 
 - Prefix key: `Ctrl+a` (instead of default `Ctrl+b`)
@@ -254,18 +234,6 @@ fish/
     └── __log_dir.fish   # Logs every visited dir to dir_history on PWD change
 ```
 
-### To activate
-
-```bash
-ln -s ~/projects/configs/fish/config.fish ~/.config/fish/config.fish
-ln -s ~/projects/configs/fish/functions/fcd.fish ~/.config/fish/functions/fcd.fish
-ln -s ~/projects/configs/fish/functions/fish_prompt.fish ~/.config/fish/functions/fish_prompt.fish
-ln -s ~/projects/configs/fish/conf.d/omf.fish ~/.config/fish/conf.d/omf.fish
-ln -s ~/projects/configs/fish/conf.d/rustup.fish ~/.config/fish/conf.d/rustup.fish
-```
-
-Or run `setup.sh`.
-
 ### Notable abbreviations / aliases
 
 | Abbr/Alias | Expands to |
@@ -281,3 +249,11 @@ Or run `setup.sh`.
 | `cv` | `claude` |
 | `l` | `ls -lA` |
 | `Ctrl+g` | `fcd` — fuzzy jump to dir from history |
+
+
+## Claude Code Configuration
+
+```
+claude-code/
+└── commands/             # User-level slash commands (linked to ~/.claude/commands)
+```
