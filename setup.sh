@@ -53,7 +53,7 @@ for src in config.fish; do
     fi
 done
 
-for src in fcd.fish fish_prompt.fish __log_dir.fish; do
+for src in fcd.fish fish_prompt.fish __log_dir.fish dotenv.fish; do
     dest="$FISH_CONFIG_DIR/functions/$src"
     if [ -e "$dest" ]; then
         echo "Fish function $src already exists at $dest, skipping."

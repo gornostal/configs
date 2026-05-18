@@ -231,7 +231,8 @@ fish/
 └── functions/
     ├── fcd.fish         # Fuzzy cd from dir history (Ctrl+g)
     ├── fish_prompt.fish # Custom prompt with git/hg branch and dirty indicator
-    └── __log_dir.fish   # Logs every visited dir to dir_history on PWD change
+    ├── __log_dir.fish   # Logs every visited dir to dir_history on PWD change
+    └── dotenv.fish      # Load KEY=value pairs from a .env file into the shell
 ```
 
 ### Notable abbreviations / aliases
