@@ -166,7 +166,8 @@ On first launch of Neovim, lazy.nvim will auto-install all plugins. Then Mason w
 tmux/
 ├── .tmux.conf
 └── scripts/
-    └── fuzzy_insert_path.sh  # Two-step fuzzy insert: dir picker, optional file picker (Tab)
+    ├── fuzzy_insert_path.sh        # Two-step fuzzy insert: dir picker, optional file picker (Tab)
+    └── join_pane_from_session.sh   # Fuzzy-pick a pane from another session and join-pane it here
 ```
 
 ### Features
@@ -196,7 +197,7 @@ tmux/
 | `Prefix h` | Split horizontally |
 | `Prefix T` | Move window to position 1 |
 | `Alt+c` | Fuzzy insert path from dir history — Enter inserts dir, Tab opens file picker under selected dir (no prefix) |
-| `Prefix j` | Scroll down (page) |
+| `Prefix j` | Fuzzy-pick a pane from another session and join-pane it into current window |
 | `Prefix k` | Scroll up (page) |
 | `Alt+z` | Zoom/unzoom current pane (no prefix) |
 | `Alt+s` | Enter copy mode and search backward (no prefix) |
