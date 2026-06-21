@@ -178,6 +178,17 @@ tmux/
 - 10000 line scrollback history
 - Windows/panes start at index 1
 
+#### Nested / remote tmux
+
+When you SSH into another host that runs this **same** config, both the local and
+remote tmux share the `Ctrl+a`/`Ctrl+s` prefix and every `Alt`/`Shift` no-prefix
+binding, so the local tmux would intercept them all. Press `F12` to flip the local
+tmux into a passthrough ("off") state where every keystroke is forwarded to the
+remote tmux — the status bar changes color while in this mode. Press `F12` again to
+take control back. It nests to arbitrary depth (press `F12` once per level to step
+inward). Install the config on the remote first: clone this repo there and run
+`./setup.sh`.
+
 ### Plugins (via TPM)
 
 | Plugin | Description |
@@ -192,6 +203,7 @@ tmux/
 | Key | Action |
 |-----|--------|
 | `Ctrl+a` | Prefix (send with `Ctrl+a Ctrl+a`) |
+| `F12` | Toggle passthrough to a nested/remote tmux — mutes local tmux so keys go to the inner session; press again to return (status bar changes color) |
 | `Prefix r` | Reload config |
 | `Prefix v` | Split vertically |
 | `Prefix h` | Split horizontally |
