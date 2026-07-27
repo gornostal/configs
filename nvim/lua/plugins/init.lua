@@ -217,4 +217,62 @@ return {
       })
     end,
   },
+
+  -- File tree sidebar
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+    },
+    keys = {
+      { "<leader>e", "<cmd>Neotree toggle<cr>", desc = "Toggle file tree" },
+      { "<leader>o", "<cmd>Neotree reveal<cr>", desc = "Reveal current file in tree" },
+    },
+    opts = {
+      close_if_last_window = true,
+      enable_git_status = true,
+      -- Plain ASCII instead of Nerd Font glyphs
+      default_component_configs = {
+        icon = {
+          folder_closed = "+",
+          folder_open = "-",
+          folder_empty = "+",
+          default = " ",
+        },
+        modified = { symbol = "[+]" },
+        indent = {
+          with_expanders = true,
+          expander_collapsed = ">",
+          expander_expanded = "v",
+          expander_highlight = "NeoTreeExpander",
+        },
+        git_status = {
+          symbols = {
+            added = "A",
+            modified = "M",
+            deleted = "D",
+            renamed = "R",
+            untracked = "?",
+            ignored = "I",
+            unstaged = "U",
+            staged = "S",
+            conflict = "C",
+          },
+        },
+      },
+      filesystem = {
+        follow_current_file = { enabled = true },
+        use_libuv_file_watcher = true,
+        filtered_items = {
+          hide_dotfiles = false,
+          hide_gitignored = true,
+        },
+      },
+      window = {
+        width = 32,
+      },
+    },
+  },
 }

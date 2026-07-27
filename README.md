@@ -49,6 +49,7 @@ On first launch of Neovim, lazy.nvim will auto-install all plugins. Then Mason w
 | **LuaSnip** | Snippet engine |
 | **nvim-treesitter** | Syntax highlighting and code parsing |
 | **roslyn.nvim** | Roslyn LSP for .NET with Razor/CSHTML support |
+| **neo-tree.nvim** | File tree sidebar (ASCII icons, no Nerd Font needed) |
 
 ## Key bindings
 
@@ -62,6 +63,8 @@ On first launch of Neovim, lazy.nvim will auto-install all plugins. Then Mason w
 | `<leader>w` | Toggle line wrap |
 | `<leader>tg` | Toggle line numbers (git signs stay visible) |
 | `<leader>bd` | Delete current buffer |
+| `<leader>e` | Toggle file tree sidebar |
+| `<leader>o` | Reveal current file in the tree |
 
 ### Window Navigation
 
