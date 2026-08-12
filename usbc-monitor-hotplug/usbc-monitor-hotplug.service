@@ -1,0 +1,13 @@
+[Unit]
+Description=Force DRM connector re-detect after USB-C hotplug
+Documentation=https://github.com/torvalds/linux/blob/master/drivers/gpu/drm/i915/display/intel_tc.c
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/usbc-monitor-hotplug
+
+# The script polls for up to ~90s by design; don't let systemd kill it early.
+TimeoutStartSec=180
+
+# Uncomment to re-enable the UCSI driver reload as a last-resort fallback.
+# Environment=USBC_HOTPLUG_UCSI_FALLBACK=1

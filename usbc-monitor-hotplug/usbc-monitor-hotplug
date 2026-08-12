@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+#
+# Force DRM connector re-detection after a USB-C hotplug event.
+#
+# Background: on Intel Arrow Lake-P / Meteor Lake display IP, the Type-C HPD
+# interrupt does not reliably reach i915 when a DP-alt-mode monitor is plugged
+# in. The connector stays cached as "disconnected" until something forces a
+# re-probe. Writing "detect" to the connector's sysfs status file does that.
+#
+# The firmware needs a while to finish DP alt-mode entry, so a single forced
+# probe right at plug time usually fails. Instead of guessing a fixed delay,
+# this polls until a new external connector shows up.
+#
+# Normally started by udev (see 99-usbc-monitor-hotplug.rules), but it is
+# safe to run by hand:  sudo usbc-monitor-hotplug
+
+set -uo pipefail
+
+TIMEOUT=${USBC_HOTPLUG_TIMEOUT:-90}          # give up after this many seconds
+INTERVAL=${USBC_HOTPLUG_INTERVAL:-2}         # seconds between probe attempts
+SETTLE=${USBC_HOTPLUG_SETTLE:-2}             # wait before the first probe
+
+# Reloading the UCSI drivers is what the original workaround did. Evidence on
+# this machine says it is not what makes detection work (both Type-C partners
+# report number_of_alternate_modes=0 and typec_displayport is not even loaded,
+# i.e. the DP mux is handled in firmware, not by the kernel typec stack).
+# It is also the risky part: it yanks the USB-C power-delivery driver, and this
+# script also fires when you plug in a plain charger. Off by default.
+# Set USBC_HOTPLUG_UCSI_FALLBACK=1 to re-enable it as a last resort.
+UCSI_FALLBACK=${USBC_HOTPLUG_UCSI_FALLBACK:-0}
+UCSI_FALLBACK_AFTER=${USBC_HOTPLUG_UCSI_FALLBACK_AFTER:-45}
+
+LOCKFILE=${USBC_HOTPLUG_LOCKFILE:-/run/usbc-monitor-hotplug.lock}
+DRM_DIR=${USBC_HOTPLUG_DRM_DIR:-/sys/class/drm}   # overridable for testing
+
+log() { printf '%s\n' "$*"; }
+
+if [[ $EUID -ne 0 && $DRM_DIR == /sys/class/drm ]]; then
+    log "must run as root (writing to $DRM_DIR/*/status)"
+    exit 1
+fi
+
+# Only one instance: a single plug event can produce several udev events.
+exec 9>"$LOCKFILE"
+if ! flock -n 9; then
+    log "another instance is already running, exiting"
+    exit 0
+fi
+
+# External connectors only. eDP is the built-in panel and never needs this.
+external_connectors() {
+    local path name
+    for path in "$DRM_DIR"/card*-*; do
+        [[ -e "$path/status" ]] || continue
+        name=${path##*/}
+        [[ $name == *eDP* ]] && continue
+        printf '%s\n' "$path"
+    done
+}
+
+connected_set() {
+    local path
+    for path in $(external_connectors); do
+        if [[ $(<"$path/status") == connected ]]; then
+            printf '%s\n' "${path##*/}"
+        fi
+    done
+}
+
+# Re-probe only connectors that are currently disconnected, so we never poke an
+# already-working display.
+force_detect() {
+    local path
+    for path in $(external_connectors); do
+        [[ $(<"$path/status") == connected ]] && continue
+        echo detect > "$path/status" 2>/dev/null
+    done
+}
+
+reload_ucsi() {
+    log "no display after ${UCSI_FALLBACK_AFTER}s, reloading UCSI drivers"
+    modprobe -r ucsi_acpi 2>/dev/null
+    modprobe -r typec_ucsi 2>/dev/null
+    modprobe typec_ucsi 2>/dev/null
+    modprobe ucsi_acpi 2>/dev/null
+}
+
+baseline=$(connected_set)
+log "starting; already connected: ${baseline//$'\n'/ } (none=empty)"
+
+# Wall-clock, not a tick counter: forcing detect on a disconnected DP connector
+# blocks on AUX probe timeouts, so an iteration takes noticeably longer than
+# INTERVAL and a counter would under-report elapsed time by ~50%.
+SECONDS=0
+sleep "$SETTLE"
+
+ucsi_done=0
+
+while (( SECONDS < TIMEOUT )); do
+    force_detect
+    current=$(connected_set)
+
+    if [[ $current != "$baseline" ]]; then
+        new=$(comm -13 <(sort <<<"$baseline") <(sort <<<"$current") | tr '\n' ' ')
+        if [[ -n ${new// /} ]]; then
+            method="detect-loop"
+            (( ucsi_done )) && method="ucsi-reload+detect-loop"
+            log "detected ${new}after ${SECONDS}s via ${method}"
+            exit 0
+        fi
+        baseline=$current
+    fi
+
+    if (( UCSI_FALLBACK && !ucsi_done && SECONDS >= UCSI_FALLBACK_AFTER )); then
+        reload_ucsi
+        ucsi_done=1
+    fi
+
+    sleep "$INTERVAL"
+done
+
+log "no new external display after ${SECONDS}s, giving up"
+exit 0

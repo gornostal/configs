@@ -1,0 +1,8 @@
+# Trigger a DRM re-detect sweep when something is plugged into a USB-C port.
+#
+# The Type-C partner device appears reliably on plug-in even though the
+# graphics HPD interrupt does not, so this is the event we hang off.
+# It also fires for chargers and other non-display partners; the service
+# handles that by simply timing out.
+
+ACTION=="add", SUBSYSTEM=="typec", KERNEL=="port*-partner", TAG+="systemd", ENV{SYSTEMD_WANTS}+="usbc-monitor-hotplug.service"
