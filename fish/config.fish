@@ -2,6 +2,9 @@ fish_add_path ~/bin ~/.local/bin ~/.dotnet/tools
 fish_add_path $HOME/.npm-global/bin
 fish_add_path $HOME/.local/share/solana/install/active_release/bin
 
+# Go toolchain (upstream tarball in /usr/local/go, not the apt package) + `go install` binaries
+fish_add_path /usr/local/go/bin $HOME/go/bin
+
 abbr sl "screen -ls"
 abbr r "rsync -poghb --backup-dir=/tmp/rsync -e /dev/null --progress"
 abbr op "xdg-open"

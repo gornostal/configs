@@ -267,6 +267,21 @@ fish/
 | `l` | `ls -lA` |
 | `Ctrl+g` | `fcd` — fuzzy jump to dir from history |
 
+### Go toolchain
+
+`config.fish` puts `/usr/local/go/bin` and `~/go/bin` on `PATH`. Go is installed from the
+upstream tarball, **not** from apt — the Ubuntu/elementary repos pin `golang-go` to an old
+release. To install or upgrade it on a new machine:
+
+```fish
+curl -LO https://go.dev/dl/goX.Y.Z.linux-amd64.tar.gz
+sudo apt remove golang-go golang-src   # only if the apt version is present
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf goX.Y.Z.linux-amd64.tar.gz
+```
+
+Check the current release at <https://go.dev/dl/>. No `GOPATH` is set; Go defaults to `~/go`.
+
 
 ## Claude Code Configuration
 
