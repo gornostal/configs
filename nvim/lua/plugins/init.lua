@@ -96,6 +96,7 @@ return {
         gutter_signs = true,
         jump_to_first_change = true,
         highlight_priority = 100,
+        cycle_hunks_across_files = true, -- ]c/[c walks hunks across file boundaries
       },
       explorer = {
         hidden = true,          -- file list starts collapsed; <leader>tb shows it
@@ -114,6 +115,30 @@ return {
         },
       },
     },
+    config = function(_, opts)
+      require("codediff").setup(opts)
+
+      -- Workaround for an upstream bug (codediff e08a35a): navigate_next and
+      -- navigate_prev call nvim_win_is_valid(explorer.winid) unguarded, but
+      -- winid is nil while the explorer is hidden -- so ]f and ]c crossing a
+      -- file boundary error out with "Invalid 'window'". -1 is never a valid
+      -- window, so the check just returns false as intended. Drop this once
+      -- upstream adds the nil guard it already has elsewhere in that file.
+      -- explorer/init.lua re-exports these by value, so patch both tables.
+      local actions = require("codediff.ui.explorer.actions")
+      local explorer_mod = require("codediff.ui.explorer")
+      for _, name in ipairs({ "navigate_next", "navigate_prev" }) do
+        local original = actions[name]
+        local patched = function(explorer)
+          if explorer then
+            explorer.winid = explorer.winid or -1
+          end
+          return original(explorer)
+        end
+        actions[name] = patched
+        explorer_mod[name] = patched
+      end
+    end,
   },
 
   -- Treesitter: better syntax highlighting and code understanding

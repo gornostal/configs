@@ -150,6 +150,14 @@ straight away, and `<leader>tb` reveals the list when you want to jump between f
 Inside a diff view: `t` toggle inline/side-by-side, `]c`/`[c` next/prev hunk, `]f`/`[f`
 next/prev file, `gc` compact mode (fold unchanged), `-` stage/unstage file,
 `<leader>hs`/`<leader>hu`/`<leader>hr` stage/unstage/discard hunk, `g?` help, `q` close.
+`]c` crosses file boundaries (`cycle_hunks_across_files`), so it walks every hunk in the
+change set without going back to the file list — the closest thing to scrolling a plain
+`git diff`. `gS` jumps between the staged and unstaged version of the current file.
+
+The plugin spec carries a small monkeypatch: upstream's `navigate_next`/`navigate_prev`
+call `nvim_win_is_valid(explorer.winid)` unguarded, and `winid` is `nil` while the explorer
+is hidden — so with `hidden = true`, `]f` and cross-file `]c` error out. Remove the patch
+once upstream adds the nil guard.
 
 Other invocations worth knowing: `:CodeDiff main...` (PR-style diff against a base branch),
 `:CodeDiff main` (vs a branch), `:CodeDiff --staged`, `:CodeDiff file HEAD` (current file only),
