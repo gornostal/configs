@@ -83,6 +83,39 @@ return {
     end,
   },
 
+  -- Unified (single-panel) git diff viewer with treesitter highlighting
+  {
+    "esmuellert/codediff.nvim",
+    cmd = "CodeDiff",
+    keys = {
+      { "<leader>gd", "<cmd>CodeDiff<cr>", desc = "CodeDiff: changed files" },
+    },
+    opts = {
+      diff = {
+        layout = "inline",      -- single pane, +/- style; press `t` for side-by-side
+        gutter_signs = true,
+        jump_to_first_change = true,
+        highlight_priority = 100,
+      },
+      explorer = {
+        hidden = true,          -- file list starts collapsed; <leader>tb shows it
+        initial_focus = "modified",
+        position = "left",
+        width = 32,
+        view_mode = "tree",
+        indent_markers = true,
+        icons = { folder_closed = "+", folder_open = "-" },
+      },
+      keymaps = {
+        view = {
+          -- defaults <leader>b / <leader>e collide with <leader>bd and neo-tree
+          toggle_explorer = "<leader>tb",
+          focus_explorer = "<leader>te",
+        },
+      },
+    },
+  },
+
   -- Treesitter: better syntax highlighting and code understanding
   {
     "nvim-treesitter/nvim-treesitter",
