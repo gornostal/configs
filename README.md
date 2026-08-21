@@ -62,6 +62,7 @@ On first launch of Neovim, lazy.nvim will auto-install all plugins. Then Mason w
 |-----|--------|
 | `<Esc>` | Clear search highlight |
 | `<leader>w` | Toggle line wrap |
+| `Ctrl+b` / `Ctrl+n` | Scroll view half a screen left / right (`zH`/`zL`; needs `nowrap`) |
 | `<leader>tg` | Toggle line numbers (git signs stay visible) |
 | `<leader>bd` | Delete current buffer |
 | `<leader>e` | Toggle file tree sidebar |
@@ -181,7 +182,6 @@ Other invocations worth knowing: `:CodeDiff main...` (PR-style diff against a ba
 |-----|--------|
 | `Ctrl+u` | Scroll up (half page) |
 | `Ctrl+d` | Scroll down (half page) |
-| `Ctrl+b` | Scroll up (full page) |
 | `Ctrl+f` | Scroll down (full page) |
 | `zt` | Scroll cursor to top |
 | `zz` | Scroll cursor to center |

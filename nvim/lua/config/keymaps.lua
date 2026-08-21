@@ -69,3 +69,7 @@ end, { desc = "Print full file path", silent = true })
 
 -- View diagnostics for current file
 keymap("n", "<leader>dd", vim.diagnostic.setloclist, { desc = "Show diagnostics", silent = true })
+
+-- Horizontal scrolling (needs :set nowrap — toggle with <leader>w)
+keymap({ "n", "v" }, "<C-b>", "zH", { desc = "Scroll half screen left", silent = true })
+keymap({ "n", "v" }, "<C-n>", "zL", { desc = "Scroll half screen right", silent = true })
