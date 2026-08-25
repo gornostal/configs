@@ -146,6 +146,58 @@ return {
     "nvim-treesitter/nvim-treesitter",
     lazy = false,
     build = ":TSUpdate",
+    config = function()
+      -- On the `main` branch highlighting is opt-in per buffer; markdown (and the
+      -- code blocks inside it) needs it for render-markdown.nvim to look right.
+      -- The markdown/markdown_inline parsers ship with Neovim, so no :TSInstall.
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "markdown" },
+        callback = function()
+          pcall(vim.treesitter.start)
+        end,
+      })
+    end,
+  },
+
+  -- In-buffer markdown rendering (headings, tables, code blocks, checkboxes)
+  {
+    "MeanderingProgrammer/render-markdown.nvim",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    ft = { "markdown", "md" },
+    keys = {
+      { "<leader>m", "<cmd>RenderMarkdown toggle<CR>", desc = "Toggle markdown rendering" },
+    },
+    opts = {
+      -- ASCII / plain-Unicode icons: this setup deliberately avoids Nerd Fonts
+      heading = {
+        sign = false,
+        icons = { "# ", "## ", "### ", "#### ", "##### ", "###### " },
+      },
+      code = {
+        sign = false,
+        language_icon = false,
+        width = "block",
+        min_width = 60,
+        left_pad = 2,
+        right_pad = 2,
+      },
+      bullet = {
+        icons = { "•", "◦", "▸", "▪" },
+      },
+      checkbox = {
+        unchecked = { icon = "[ ]" },
+        checked = { icon = "[x]" },
+      },
+      dash = { icon = "─" },
+      quote = { icon = "▌" },
+      link = {
+        image = "",
+        email = "",
+        hyperlink = "",
+      },
+      -- needs the latex2text CLI; off by default here
+      latex = { enabled = false },
+    },
   },
 
   -- Colorscheme

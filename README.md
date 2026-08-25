@@ -51,6 +51,7 @@ On first launch of Neovim, lazy.nvim will auto-install all plugins. Then Mason w
 | **roslyn.nvim** | Roslyn LSP for .NET with Razor/CSHTML support |
 | **neo-tree.nvim** | File tree sidebar (ASCII icons, no Nerd Font needed) |
 | **codediff.nvim** | VSCode-style diff viewer; unified single-pane layout with treesitter highlighting |
+| **render-markdown.nvim** | In-buffer markdown rendering (headings, tables, code blocks, checkboxes) |
 
 ## Key bindings
 
@@ -62,6 +63,7 @@ On first launch of Neovim, lazy.nvim will auto-install all plugins. Then Mason w
 |-----|--------|
 | `<Esc>` | Clear search highlight |
 | `<leader>w` | Toggle line wrap |
+| `<leader>m` | Toggle markdown rendering (in a markdown buffer) |
 | `Ctrl+b` / `Ctrl+n` | Scroll view half a screen left / right (`zH`/`zL`; needs `nowrap`) |
 | `<leader>tg` | Toggle line numbers (git signs stay visible) |
 | `<leader>bd` | Delete current buffer |
@@ -163,6 +165,27 @@ once upstream adds the nil guard.
 Other invocations worth knowing: `:CodeDiff main...` (PR-style diff against a base branch),
 `:CodeDiff main` (vs a branch), `:CodeDiff --staged`, `:CodeDiff file HEAD` (current file only),
 `:CodeDiff history` (commit browser), `:CodeDiff -- src/api` (scope to a path).
+
+### Markdown
+
+`render-markdown.nvim` renders markdown inside the real buffer — headings, tables, code
+blocks, bullets, checkboxes and block quotes are drawn as virtual text, and the raw text
+comes back on whichever line the cursor is on. No browser, no external renderer.
+
+Icons are configured as plain ASCII/Unicode (`#`, `[ ]`, `•`) to match the rest of this
+setup, which does not assume a Nerd Font. Sign-column icons are off so gitsigns keeps
+the gutter. LaTeX rendering is disabled (it needs the `latex2text` CLI).
+
+The `markdown` and `markdown_inline` treesitter parsers ship with Neovim, so nothing needs
+installing. Since nvim-treesitter is on its `main` branch, highlighting is opt-in per
+buffer — the treesitter spec has a `FileType markdown` autocmd calling
+`vim.treesitter.start()`, which is also what syntax-highlights fenced code blocks.
+
+| Key | Action |
+|-----|--------|
+| `<leader>m` | Toggle rendering on/off |
+
+`:RenderMarkdown` also takes `enable`/`disable`/`toggle`/`expand`/`contract`/`log`/`debug`.
 
 ### Autocompletion
 
