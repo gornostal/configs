@@ -208,7 +208,10 @@ return {
     priority = 1000,
     config = function()
       require("catppuccin").setup({
-        flavour = "mocha",
+        -- "auto" follows vim.o.background, so :set background=light swaps
+        -- mocha -> latte (see <leader>tt in keymaps.lua)
+        flavour = "auto",
+        background = { light = "latte", dark = "mocha" },
       })
       vim.cmd.colorscheme("catppuccin")
     end,

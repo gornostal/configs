@@ -30,6 +30,11 @@ keymap("n", "<leader>tg", function()
   vim.o.relativenumber = not vim.o.relativenumber
 end, { desc = "Toggle line numbers", silent = true })
 
+-- Toggle light/dark theme (session-only, never written to disk)
+keymap("n", "<leader>tt", function()
+  vim.o.background = vim.o.background == "dark" and "light" or "dark"
+end, { desc = "Toggle light/dark theme", silent = true })
+
 -- Git diff in a scratch buffer
 local function show_diff(cmd, title)
   local output = vim.fn.systemlist(cmd)

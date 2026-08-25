@@ -36,7 +36,7 @@ On first launch of Neovim, lazy.nvim will auto-install all plugins. Then Mason w
 | Plugin | Description |
 |--------|-------------|
 | **lazy.nvim** | Plugin manager |
-| **catppuccin** | Color scheme (mocha flavor) |
+| **catppuccin** | Color scheme (mocha dark / latte light, follows `background`) |
 | **copilot.vim** | GitHub Copilot AI code completion |
 | **neoscroll.nvim** | Smooth scrolling animations |
 | **telescope.nvim** | Fuzzy finder for files, grep, buffers |
@@ -66,6 +66,7 @@ On first launch of Neovim, lazy.nvim will auto-install all plugins. Then Mason w
 | `<leader>m` | Toggle markdown rendering (in a markdown buffer) |
 | `Ctrl+b` / `Ctrl+n` | Scroll view half a screen left / right (`zH`/`zL`; needs `nowrap`) |
 | `<leader>tg` | Toggle line numbers (git signs stay visible) |
+| `<leader>tt` | Toggle light/dark theme (catppuccin latte/mocha, session-only) |
 | `<leader>bd` | Delete current buffer |
 | `<leader>e` | Toggle file tree sidebar |
 | `<leader>o` | Reveal current file in the tree |
