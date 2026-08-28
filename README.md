@@ -50,7 +50,6 @@ On first launch of Neovim, lazy.nvim will auto-install all plugins. Then Mason w
 | **nvim-treesitter** | Syntax highlighting and code parsing |
 | **roslyn.nvim** | Roslyn LSP for .NET with Razor/CSHTML support |
 | **neo-tree.nvim** | File tree sidebar (ASCII icons, no Nerd Font needed) |
-| **codediff.nvim** | VSCode-style diff viewer; unified single-pane layout with treesitter highlighting |
 | **render-markdown.nvim** | In-buffer markdown rendering (headings, tables, code blocks, checkboxes) |
 
 ## Key bindings
@@ -133,39 +132,6 @@ On first launch of Neovim, lazy.nvim will auto-install all plugins. Then Mason w
 | `<leader>gs` | Git status (fuzzy find changed files) |
 | `<leader>diff` | Show unstaged changes + new files |
 | `<leader>dic` | Show staged changes (git diff --cached) |
-
-#### CodeDiff
-
-Unified (single-pane) diff viewer: additions and deletions in one window with full
-treesitter highlighting on both, plus character-level highlights inside changed lines.
-Press `t` inside a diff to switch to side-by-side. The diff engine is a prebuilt C
-library that the plugin downloads from GitHub releases on first use — no compiler needed,
-but the first `:CodeDiff` requires network access.
-
-The file-list sidebar (explorer) is **hidden by default** — a diff opens on a changed file
-straight away, and `<leader>tb` reveals the list when you want to jump between files.
-
-| Key | Action |
-|-----|--------|
-| `<leader>gd` | Open CodeDiff on the working-tree changes |
-| `<leader>tb` | Show/hide the file list (inside a diff view) |
-| `<leader>te` | Focus the file list (inside a diff view) |
-
-Inside a diff view: `t` toggle inline/side-by-side, `]c`/`[c` next/prev hunk, `]f`/`[f`
-next/prev file, `gc` compact mode (fold unchanged), `-` stage/unstage file,
-`<leader>hs`/`<leader>hu`/`<leader>hr` stage/unstage/discard hunk, `g?` help, `q` close.
-`]c` crosses file boundaries (`cycle_hunks_across_files`), so it walks every hunk in the
-change set without going back to the file list — the closest thing to scrolling a plain
-`git diff`. `gS` jumps between the staged and unstaged version of the current file.
-
-The plugin spec carries a small monkeypatch: upstream's `navigate_next`/`navigate_prev`
-call `nvim_win_is_valid(explorer.winid)` unguarded, and `winid` is `nil` while the explorer
-is hidden — so with `hidden = true`, `]f` and cross-file `]c` error out. Remove the patch
-once upstream adds the nil guard.
-
-Other invocations worth knowing: `:CodeDiff main...` (PR-style diff against a base branch),
-`:CodeDiff main` (vs a branch), `:CodeDiff --staged`, `:CodeDiff file HEAD` (current file only),
-`:CodeDiff history` (commit browser), `:CodeDiff -- src/api` (scope to a path).
 
 ### Markdown
 
