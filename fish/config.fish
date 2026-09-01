@@ -5,6 +5,25 @@ fish_add_path $HOME/.local/share/solana/install/active_release/bin
 # Go toolchain (upstream tarball in /usr/local/go, not the apt package) + `go install` binaries
 fish_add_path /usr/local/go/bin $HOME/go/bin
 
+# Android SDK — Android Studio is installed as a Flatpak, but the SDK itself
+# lives on the host, so host tools (gradle, expo, adb) need these.
+set -gx ANDROID_HOME $HOME/Android/Sdk
+set -gx ANDROID_SDK_ROOT $ANDROID_HOME
+
+# platform-tools must win over /usr/bin/adb, which the apt package
+# `google-android-platform-tools-installer` provides at an older version
+# (35.0.0 vs the SDK's 37.0.0). Two adb versions fighting over port 5037 is
+# what leaves a device stuck `offline`. $fish_user_paths precedes the system
+# paths, so adding it here is enough.
+fish_add_path $ANDROID_HOME/platform-tools
+
+# Absent until "Android SDK Command-line Tools" is installed from Android
+# Studio's SDK Manager (provides sdkmanager/avdmanager); guarded so
+# fish_add_path does not warn about a missing directory.
+if test -d $ANDROID_HOME/cmdline-tools/latest/bin
+    fish_add_path $ANDROID_HOME/cmdline-tools/latest/bin
+end
+
 abbr sl "screen -ls"
 abbr r "rsync -poghb --backup-dir=/tmp/rsync -e /dev/null --progress"
 abbr op "xdg-open"

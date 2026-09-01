@@ -306,6 +306,21 @@ sudo tar -C /usr/local -xzf goX.Y.Z.linux-amd64.tar.gz
 
 Check the current release at <https://go.dev/dl/>. No `GOPATH` is set; Go defaults to `~/go`.
 
+### Android SDK
+
+`config.fish` exports `ANDROID_HOME`/`ANDROID_SDK_ROOT` (`~/Android/Sdk`) and puts the
+SDK's `platform-tools` on `PATH`. Android Studio itself is installed as a Flatpak, but the
+SDK lives on the host, so host-side tools (gradle, expo, `adb`) need these set explicitly.
+
+`platform-tools` is added via `fish_add_path`, which prepends to `$fish_user_paths` and so
+wins over `/usr/bin/adb` from the apt package `google-android-platform-tools-installer`
+(35.0.0, older than the SDK's 37.0.0). This matters: two `adb` versions fighting over port
+5037 is what leaves a connected device stuck in `offline` state.
+
+`cmdline-tools/latest/bin` (`sdkmanager`, `avdmanager`) is added only if it exists — it
+appears after installing **Android SDK Command-line Tools** from Android Studio's SDK
+Manager.
+
 
 ## Claude Code Configuration
 
