@@ -23,11 +23,33 @@ Uninstall with `./uninstall.sh`.
 
 ## The problem
 
-On this hardware the Type-C hotplug (HPD) interrupt does not reliably reach the
-i915 driver when a DP-alt-mode monitor is plugged in. The DRM connector stays
-cached as `disconnected` and the compositor never learns there is a display.
+Hotplugging a DP-alt-mode monitor leaves the DRM connector permanently
+`disconnected`, so the compositor never learns there is a display. Detection at
+*boot* works fine — it is hotplug-only.
 
-Detection at *boot* works fine — it is only hotplug that fails.
+**The HPD interrupt is not the problem.** Confirmed with `drm.debug=0xe`: the
+long HPD pulse arrives 3–4s after plug and the TC port enters `dp-alt` correctly.
+What fails is AUX — every transfer times out (`status 0x7c7c023f`, DPCD `-110`)
+and keeps timing out for **~50 seconds**.
+
+Meanwhile `intel_ddi_hotplug()` allows type-C connectors only 5 retries at
+`HPD_RETRY_DELAY` (1000ms):
+
+```c
+/* drivers/gpu/drm/i915/display/intel_ddi.c */
+if (state == INTEL_HOTPLUG_UNCHANGED &&
+    connector->hotplug_retries < (is_tc ? 5 : 1) &&
+    !dig_port->dp.is_mst)
+        state = INTEL_HOTPLUG_RETRY;
+```
+
+That budget is spent ~14s after plug. No retry gets re-armed, there is no polled
+fallback, and **i915 never touches the port again** — verified as 170s of total
+silence in the logs. The remaining ~36s of AUX-unavailable time is never
+revisited, so the connector stays `disconnected` indefinitely.
+
+Writing `detect` to the sysfs `status` file probes out-of-band, past the
+exhausted budget, and succeeds once AUX comes up.
 
 Confirmed environment where this was needed:
 
@@ -44,22 +66,49 @@ reacts to.
 
 ## Why it polls instead of waiting a fixed delay
 
-The firmware needs time to finish DP alt-mode entry. A single forced probe at
-plug time is too early; the old "wait 30–60s" was a conservative guess. This
-polls every 2s and exits as soon as a new external connector reports
-`connected`, so it fires as early as the hardware allows.
-
-Measured on this machine: **~16s** from plug to detection, so the old manual
-wait was roughly 2–4x longer than necessary.
+AUX stays dead for ~50s, so a single forced probe at plug time is far too early.
+The loop polls every 2s and exits as soon as a new external connector reports
+`connected`, firing as early as the hardware allows.
 
 Only connectors that are currently *disconnected* get poked, so an
 already-working display is never disturbed.
 
+### The workaround is load-bearing, not cosmetic
+
+Verified by A/B, 3 runs each, 180s window, `drm.debug=0xe`, udev rule disabled
+(`capture-evidence.sh`):
+
+| Forced `echo detect` | Result |
+|---|---|
+| no | never connected within 180s (x3) |
+| every 2s | connected at 56s, 51s, 49s |
+
+Without an out-of-band probe the display **never** appears. The earlier "9–63s"
+figures came from the service's own logs and are unreliable — those runs raced
+against udev retriggers. The clean number is ~50s.
+
+### AUX heals on wall-clock alone
+
+`wallclock-test.sh` settles what the A/B could not. Plug in, touch nothing for
+90s, then write `detect` exactly once:
+
+```
+10:10:14  plugged in
+10:10:26  i915 gives up at retry 5
+          ... 78 seconds of complete silence, zero port activity ...
+10:11:44  single detect write -> EDID read succeeds on the FIRST AUX
+          transaction -> status updated disconnected -> connected
+```
+
+So elapsed time brings AUX back, not repeated probing. The 2s polling here is
+therefore wasteful but harmless — a single probe at ~60s would do. Upstream,
+the same conclusion means i915 needs to retry **once, later**, not poll.
+
 ## Two things deliberately left out
 
-The original workaround did three things. Two of them are no-ops on this setup
-— confirmed by a live replug test, where the detect loop alone found the
-monitor with the UCSI reload disabled:
+The original workaround did three things. Two of them appear to be no-ops on
+this setup — a live replug test found the monitor with the UCSI reload
+disabled, i.e. the detect loop alone was enough:
 
 - **`xrandr --auto`** — the session is Wayland. `xrandr` only talks to XWayland
   and cannot drive real outputs. Output reconfiguration comes from mutter
@@ -101,12 +150,33 @@ single-instance locking, and that an already-connected output is never poked.
 
 ## Upstream status
 
-As of 2026-08 there is no known permanent fix.
+As of 2026-09 there is no known permanent fix. No pre-existing report covered
+this case: searched `drm/i915/kernel` on freedesktop GitLab (the `drm/intel`
+tracker is archived) across hotplug / type-c / DP-alt-mode / `hotplug_retries` /
+`echo detect` terms. Nearest open issues, all distinct:
 
-- Switching to the `xe` driver will **not** help: `drivers/gpu/drm/i915/display/`
-  is compiled twice, once into `i915.ko` and once into `xe.ko` via compat
-  headers, so the Type-C HPD code is identical in both. Don't bother with
-  `xe.force_probe`.
+| Issue | Why it is not this |
+|---|---|
+| [#16601](https://gitlab.freedesktop.org/drm/i915/kernel/-/issues/16601) | TGL, *cold* plug at driver load, `intel_tc_port_sanitize_mode` teardown |
+| [#16256](https://gitlab.freedesktop.org/drm/i915/kernel/-/issues/16256) | RPL-P, KWin-only (`enabled` stuck), not reproducible under mutter |
+| [#16818](https://gitlab.freedesktop.org/drm/i915/kernel/-/issues/16818) | TGL, HDMI *unplug* missed, status stuck `connected` |
+
+Roughly 15 open Arrow Lake issues exist; none concern Type-C hotplug, and none
+concern the exhausted `hotplug_retries` budget. [#15924](https://gitlab.freedesktop.org/drm/i915/kernel/-/issues/15924)
+is ADL-N TC-legacy link training *after* a successful detect, so also unrelated.
+
+**Filed upstream as
+[i915#16955](https://gitlab.freedesktop.org/drm/i915/kernel/-/work_items/16955)**
+(2026-09-02), with the `drm.debug=0xe` A/B evidence, the three-procedure
+timeline and the `intel_ddi.c` code citation. Local copy of the submitted text
+and attachments: `~/i915-hotplug-report/`.
+
+Watch that issue before removing this workaround.
+
+- Switching to the `xe` driver is still not expected to help: `intel_ddi.c`
+  carries the retry budget and is compiled into both `i915.ko` and `xe.ko`.
+  Not separately verified.
+
 - BIOS `QLCN29WW` is current; `fwupdmgr` reports no pending updates.
 - The 2025 i915 HPD patch series on intel-gfx targets HPD-storm/polling
   behaviour on Simatic IPC boards, not Type-C.
