@@ -86,7 +86,7 @@ set -gx ELECTRON_OZONE_PLATFORM_HINT wayland
 set -gx DENO_INSTALL ~/.deno
 
 # AI
-abbr x "codex -s danger-full-access"
+abbr x "codex"
 abbr cv "claude"
 abbr cop "copilot --disable-builtin-mcps --allow-all-paths --allow-all-tools"
 
@@ -102,3 +102,16 @@ set -gx AWS_PROFILE default-mfa
 # Dir history (absolute paths, persistent)
 source ~/.config/fish/functions/__log_dir.fish
 bind \cg 'fcd; commandline -f repaint'
+
+# Node via nvm. nvm.sh is a bash script fish cannot source, so resolve the
+# `default` alias here and prepend that version's bin to PATH. Prepending to
+# PATH (not fish_user_paths) keeps it ahead of ~/.npm-global/bin and leaves no
+# stale entry behind when the default version changes. `nvm` itself is a
+# wrapper function in functions/nvm.fish.
+set -gx NVM_DIR $HOME/.nvm
+if test -f $NVM_DIR/alias/default
+    set -l __nvm_ver (__nvm_resolve_alias default)
+    if test -d $NVM_DIR/versions/node/$__nvm_ver/bin
+        set -gx PATH $NVM_DIR/versions/node/$__nvm_ver/bin $PATH
+    end
+end
