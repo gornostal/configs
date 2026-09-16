@@ -270,7 +270,7 @@ fish/
 │   ├── omf.fish         # Oh My Fish loader
 │   └── rustup.fish      # Cargo/Rust env
 └── functions/
-    ├── fcd.fish         # Fuzzy cd from dir history (Ctrl+g)
+    ├── fcd.fish         # Fuzzy cd from dir history, 100 most recent dirs (Ctrl+g)
     ├── fish_prompt.fish # Custom prompt with git/hg branch and dirty indicator
     ├── __log_dir.fish   # Logs every visited dir to dir_history on PWD change
     └── dotenv.fish      # Load KEY=value pairs from a .env file into the shell
@@ -291,6 +291,11 @@ fish/
 | `cv` | `claude` |
 | `l` | `ls -lA` |
 | `Ctrl+g` | `fcd` — fuzzy jump to dir from history |
+
+### Directory history
+
+`__log_dir.fish` appends every visited dir to `~/.local/share/fish/dir_history`. `fcd`
+reads it newest-first, drops duplicates, and offers the 100 most recent dirs that still exist.
 
 ### Go toolchain
 
