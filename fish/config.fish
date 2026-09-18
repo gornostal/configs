@@ -115,3 +115,9 @@ if test -f $NVM_DIR/alias/default
         set -gx PATH $NVM_DIR/versions/node/$__nvm_ver/bin $PATH
     end
 end
+
+# Pager: mouse-wheel scrolling in less (git diff via delta, man, `L`). less has
+# supported --mouse since 5.07; it is off by default. -R keeps delta's colours,
+# --wheel-lines sets how far one notch scrolls. While --mouse is on less owns
+# the mouse, so click-dragging to select text needs Shift held.
+set -gx LESS '-R --mouse --wheel-lines=3'
