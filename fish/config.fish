@@ -90,11 +90,6 @@ abbr x "codex"
 abbr cv "claude"
 abbr cop "copilot --disable-builtin-mcps --allow-all-paths --allow-all-tools"
 
-# Disable Claude Code flicker workaround over SSH
-if set -q SSH_TTY; or set -q SSH_CONNECTION
-    set -gx CLAUDE_CODE_NO_FLICKER 0
-end
-
 # Turnip
 abbr tip turnip
 set -gx AWS_PROFILE default-mfa
