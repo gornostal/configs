@@ -294,9 +294,16 @@ fish/
 
 ### Prompt
 
-The ➜ arrow is green normally, **yellow when `LFG_SESSION` is set** — i.e. inside an
-`lfg unseal` session, where sealed files are readable (see `~/projects/lfg/README.md`) —
-and red when the last command failed (failure still wins over the session color).
+The ➜ arrow is green normally and red when the last command failed. **Inside an
+`lfg unseal` session** (`LFG_SESSION` is set, sealed files are readable — see
+`~/projects/lfg/README.md`) the arrow is replaced by a yellow open padlock 󰿆
+(U+F0FC6, `nf-md-lock_open_variant`); it still turns red when the last command failed.
+
+The padlock is a Nerd Font glyph, but the terminal font itself need not be one —
+fontconfig fallback is enough (Guake on Roboto Mono picks it up from UbuntuMono Nerd
+Font). `fish_prompt.fish` checks once per shell whether `fc-list` knows any font with
+that codepoint and keeps the plain arrow (still yellow) if not, so machines without a
+Nerd Font never show a tofu box.
 
 ### Directory history
 

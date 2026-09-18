@@ -53,6 +53,14 @@ function fish_prompt
             end
             return 1
         end
+
+        # Glyph shown instead of the arrow inside an `lfg unseal` session:
+        # an open padlock, U+F0FC6 (nf-md-lock_open_variant). It needs a Nerd
+        # Font, so keep the arrow when fontconfig knows no font that has it.
+        set -g __lfg_unsealed_glyph '➜'
+        if type -q fc-list; and test -n "$(fc-list ':charset=f0fc6' 2>/dev/null)"
+            set -g __lfg_unsealed_glyph \U000f0fc6
+        end
     end
 
     set -l cyan (set_color -o cyan)
@@ -71,6 +79,9 @@ function fish_prompt
     end
 
     set -l arrow "$arrow_color➜ "
+    if set -q LFG_SESSION
+        set arrow "$arrow_color$__lfg_unsealed_glyph "
+    end
     if fish_is_root_user
         set arrow "$arrow_color# "
     end
