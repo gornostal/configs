@@ -63,6 +63,9 @@ function fish_prompt
     set -l normal (set_color normal)
 
     set -l arrow_color "$green"
+    if set -q LFG_SESSION
+        set arrow_color "$yellow"
+    end
     if test $__last_command_exit_status != 0
         set arrow_color "$red"
     end

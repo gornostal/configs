@@ -292,6 +292,12 @@ fish/
 | `l` | `ls -lA` |
 | `Ctrl+g` | `fcd` — fuzzy jump to dir from history |
 
+### Prompt
+
+The ➜ arrow is green normally, **yellow when `LFG_SESSION` is set** — i.e. inside an
+`lfg unseal` session, where sealed files are readable (see `~/projects/lfg/README.md`) —
+and red when the last command failed (failure still wins over the session color).
+
 ### Directory history
 
 `__log_dir.fish` appends every visited dir to `~/.local/share/fish/dir_history`. `fcd`
