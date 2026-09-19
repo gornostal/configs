@@ -23,7 +23,8 @@ nvim/
 ├── lua/
 │   ├── config/
 │   │   ├── options.lua   # Basic settings (line numbers, tabs, etc.)
-│   │   └── keymaps.lua   # Key bindings
+│   │   ├── keymaps.lua   # Key bindings
+│   │   └── run.lua       # :X — run the current file and show its output
 │   └── plugins/
 │       └── init.lua      # All plugins (LSP, completion, theme)
 └── .gitignore
@@ -154,6 +155,24 @@ buffer — the treesitter spec has a `FileType markdown` autocmd calling
 | `<leader>m` | Toggle rendering on/off |
 
 `:RenderMarkdown` also takes `enable`/`disable`/`toggle`/`expand`/`contract`/`log`/`debug`.
+
+### Running the current file
+
+`:X` runs the current file as an executable (it must be `chmod +x`) and streams both
+stdout and stderr into a `[Run Output]` scratch split at the bottom. The file is saved
+first, and the process runs with the file's own directory as the working directory. The
+first line echoes the command, the last reports exit code and elapsed time. Output is a
+normal buffer, so it can be searched, yanked and folded; `q` closes the split.
+
+| Command | Action |
+|---------|--------|
+| `:X arg1 arg2` | Run `./current-file arg1 arg2`, output into the scratch split |
+| `:X!` | Run in a real terminal split instead — for programs that read stdin |
+| `:XX` | Re-run with the previous arguments |
+
+Runs are asynchronous, so Neovim stays usable while a long process streams output; a new
+`:X` kills the previous run. (`:x` itself can't be used — it's Neovim's write-and-quit,
+and user commands have to start with a capital.)
 
 ### Autocompletion
 

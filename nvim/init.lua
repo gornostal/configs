@@ -17,6 +17,7 @@ vim.g.maplocalleader = " "
 -- Load configuration
 require("config.options")
 require("config.keymaps")
+require("config.run")
 
 -- Load plugins
 require("lazy").setup("plugins")
