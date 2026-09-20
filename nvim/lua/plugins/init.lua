@@ -1,9 +1,4 @@
 return {
-  -- GitHub Copilot
-  {
-    "github/copilot.vim",
-  },
-
   -- Smooth scrolling
   {
     "karb94/neoscroll.nvim",

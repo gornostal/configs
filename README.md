@@ -38,7 +38,6 @@ On first launch of Neovim, lazy.nvim will auto-install all plugins. Then Mason w
 |--------|-------------|
 | **lazy.nvim** | Plugin manager |
 | **catppuccin** | Color scheme (mocha dark / latte light, follows `background`) |
-| **copilot.vim** | GitHub Copilot AI code completion |
 | **neoscroll.nvim** | Smooth scrolling animations |
 | **telescope.nvim** | Fuzzy finder for files, grep, buffers |
 | **flash.nvim** | Quick jumps with labels |
