@@ -6,8 +6,15 @@ set -euo pipefail
 
 current_session=$(tmux display-message -p '#S')
 
-selection=$(tmux list-panes -a -F '#{session_name}	#{pane_id}	#{session_name}:#{window_index}.#{pane_index}  #{b:pane_current_path}  [#{pane_current_command}]' \
-  | awk -F'\t' -v cur="$current_session" '$1 != cur { print $2 "\t" $3 }')
+# Panes already reachable from this session. A window can be linked into several
+# sessions, and grouped sessions (new-session -t) share all of their windows, so
+# the same pane shows up in list-panes -a once per session it belongs to.
+own_panes=$(tmux list-panes -s -t "$current_session" -F '#{pane_id}')
+
+selection=$(tmux list-panes -a -F '#{pane_id}	#{session_name}:#{window_index}.#{pane_index}  #{b:pane_current_path}  [#{pane_current_command}]' \
+  | awk -F'\t' -v own="$own_panes" '
+      BEGIN { n = split(own, ids, "\n"); for (i = 1; i <= n; i++) mine[ids[i]] = 1 }
+      !mine[$1] && !seen[$1]++')
 
 if [ -z "$selection" ]; then
   tmux display-message "No panes in other sessions"
