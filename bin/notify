@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+"""Send a short plain-text message to Telegram.
+
+Reads TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID from the environment,
+or from the .env file in the configs repo root.
+"""
+import json
+import os
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+MAX_LEN = 200
+ENV_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", ".env")
+
+USAGE = f"""usage: notify <message>
+
+Send a plain-text Telegram message (max {MAX_LEN} chars).
+Credentials: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID from the environment
+or from {os.path.normpath(ENV_FILE)}."""
+
+
+def load_env():
+    env = {}
+    try:
+        with open(ENV_FILE) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, val = line.split("=", 1)
+                env[key.strip()] = val.strip().strip("'\"")
+    except FileNotFoundError:
+        pass
+    env.update({k: v for k, v in os.environ.items() if k.startswith("TELEGRAM_")})
+    return env
+
+
+def main():
+    if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
+        print(USAGE)
+        return 0 if len(sys.argv) > 1 else 1
+
+    text = " ".join(sys.argv[1:]).strip()
+    if not text:
+        print("notify: message is empty", file=sys.stderr)
+        return 1
+    if len(text) > MAX_LEN:
+        print(f"notify: message is {len(text)} chars, max is {MAX_LEN}", file=sys.stderr)
+        return 1
+
+    env = load_env()
+    token, chat_id = env.get("TELEGRAM_BOT_TOKEN"), env.get("TELEGRAM_CHAT_ID")
+    if not token or not chat_id:
+        print("notify: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must be set", file=sys.stderr)
+        return 1
+
+    data = urllib.parse.urlencode({"chat_id": chat_id, "text": text}).encode()
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    try:
+        with urllib.request.urlopen(url, data=data, timeout=15) as res:
+            json.load(res)
+    except urllib.error.HTTPError as e:
+        desc = json.load(e).get("description", e.reason)
+        print(f"notify: Telegram error {e.code}: {desc}", file=sys.stderr)
+        return 1
+    except urllib.error.URLError as e:
+        print(f"notify: {e.reason}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

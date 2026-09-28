@@ -359,6 +359,19 @@ appears after installing **Android SDK Command-line Tools** from Android Studio'
 Manager.
 
 
+## Helper tools (`bin/`)
+
+`setup.sh` symlinks every file in `bin/` into `~/bin` (already on `PATH` via `config.fish`).
+
+| Tool | Description |
+|------|-------------|
+| `notify <message>` | Send a plain-text Telegram message (max 200 chars, no markdown). No args → help. |
+
+`notify` is Python (stdlib only). It reads `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
+from the environment, else from `.env` in the repo root (gitignored; values copied from
+`~/projects/assi-skills/.env`). It resolves its own symlink to find that file.
+
+
 ## Claude Code Configuration
 
 ```

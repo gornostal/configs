@@ -17,6 +17,18 @@ else
     echo "Claude commands linked to $CLAUDE_COMMANDS_DIR"
 fi
 
+mkdir -p "$HOME/bin"
+chmod +x "$SCRIPT_DIR"/bin/*
+for src in "$SCRIPT_DIR"/bin/*; do
+    dest="$HOME/bin/$(basename "$src")"
+    if [ -e "$dest" ]; then
+        echo "Tool $(basename "$src") already exists at $dest, skipping."
+    else
+        ln -s "$src" "$dest"
+        echo "Tool $(basename "$src") linked to $dest"
+    fi
+done
+
 if [ -e "$NVIM_CONFIG_DIR" ]; then
     echo "Neovim config already exists at $NVIM_CONFIG_DIR, skipping setup."
 else
