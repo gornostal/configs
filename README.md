@@ -366,10 +366,32 @@ Manager.
 | Tool | Description |
 |------|-------------|
 | `notify <message>` | Send a plain-text Telegram message (max 200 chars, no markdown). No args → help. |
+| `runagent -a claude\|codex [-p PROMPT \| -f FILE] [-d DIR] [-- ARGS]` | Run Claude Code / Codex non-interactively (for cron). Prompt from `-p`, `-f` or stdin. |
 
 `notify` is Python (stdlib only). It reads `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
 from the environment, else from `.env` in the repo root (gitignored; values copied from
 `~/projects/assi-skills/.env`). It resolves its own symlink to find that file.
+
+`runagent` (Python, stdlib only) runs `claude -p` or `codex exec -` with the prompt on
+stdin, plus a footer telling the agent to `notify` the user if the task fails. `-a` is
+required. A missing/invalid `-a`, a missing prompt, an unreadable file or unknown options
+exit 1. Those errors, a missing agent binary and a non-zero agent exit also trigger
+`notify` (`runagent` with no args just prints help). Because cron's `PATH` is minimal, it
+adds `~/bin`, `~/.local/bin` and the newest `~/.nvm/versions/node/*/bin` to `PATH`.
+Arguments after `--` go to the agent.
+
+Agents run without prompts, but with a tool-call classifier instead of a full bypass:
+
+- claude: `--permission-mode auto` (auto mode: each tool call is classified, and risky ones
+  are blocked instead of prompted).
+- codex: `--approve-for-me` (approval requests go to an automatic reviewer; runs in the
+  `workspace-write` sandbox) with `-c sandbox_workspace_write.network_access=true`, since
+  that sandbox has no network by default and `notify` needs it. `--skip-git-repo-check`
+  lets it run outside a git repo.
+
+```cron
+0 7 * * * runagent -a codex -d ~/projects/foo -f ~/prompts/daily.md >> ~/agent.log 2>&1
+```
 
 
 ## Claude Code Configuration

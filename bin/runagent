@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+"""Run an AI agent (Claude Code or Codex) non-interactively, e.g. from cron.
+
+The prompt comes from -p, -f or stdin. A footer is appended telling the agent
+to use `notify` if the task fails; if the agent itself fails to run (non-zero
+exit, missing binary), runagent calls `notify` too.
+"""
+import argparse
+import glob
+import os
+import shutil
+import subprocess
+import sys
+
+HOME = os.path.expanduser("~")
+AGENTS = ("claude", "codex")
+MAX_NOTIFY = 200
+
+FOOTER = """
+
+--
+if task fails, use `notify <msg>` to notify the user about the failure. keep message under 200 chars.
+"""
+
+USAGE = """\
+usage: runagent -a claude|codex [-p PROMPT | -f FILE] [-d DIR] [-- AGENT_ARGS...]
+
+Run an agent non-interactively with the given prompt (read from stdin when
+neither -p nor -f is given). Its output goes to stdout/stderr. If the agent
+fails to run, `notify` sends a Telegram message.
+
+  -a AGENT    claude or codex (required)
+  -p PROMPT   prompt text
+  -f FILE     read prompt from FILE
+  -d DIR      working directory for the agent (default: current dir)
+  --          everything after is passed to the agent as-is
+
+Agents run without prompts, but a classifier still reviews each tool call:
+  claude  --permission-mode auto
+  codex   --approve-for-me (workspace-write sandbox, network allowed)
+
+cron example:
+  0 7 * * * runagent -a codex -d ~/projects/foo -f ~/prompts/daily.md >> ~/agent.log 2>&1"""
+
+
+class Parser(argparse.ArgumentParser):
+    def error(self, message):
+        fail(f"runagent: {message}")
+
+
+def fix_path():
+    """cron runs with a bare PATH; add the dirs where agents and notify live."""
+    extra = [os.path.join(HOME, "bin"), os.path.join(HOME, ".local/bin")]
+    nvm = sorted(glob.glob(os.path.join(HOME, ".nvm/versions/node/*/bin")), reverse=True)
+    extra += nvm[:1]
+    parts = os.environ.get("PATH", "/usr/bin:/bin").split(os.pathsep)
+    os.environ["PATH"] = os.pathsep.join([p for p in extra if p not in parts] + parts)
+
+
+def notify(text):
+    if len(text) > MAX_NOTIFY:
+        text = text[: MAX_NOTIFY - 3] + "..."
+    try:
+        subprocess.run(["notify", text], check=False)
+    except OSError as e:
+        print(f"runagent: couldn't run notify: {e}", file=sys.stderr)
+
+
+def fail(msg, code=1):
+    """Report a runagent error on stderr and via notify, then exit."""
+    print(msg, file=sys.stderr)
+    notify(msg)
+    sys.exit(code)
+
+
+def build_cmd(agent, extra):
+    if agent == "claude":
+        cmd = ["claude", "-p", "--permission-mode", "auto"]
+    else:
+        cmd = [
+            "codex", "exec", "--approve-for-me", "--skip-git-repo-check",
+            "-c", "sandbox_workspace_write.network_access=true",
+        ]
+    cmd += extra
+    if agent == "codex":
+        cmd.append("-")  # read prompt from stdin
+    return cmd
+
+
+def main():
+    fix_path()
+    argv = sys.argv[1:]
+    if not argv or argv[0] in ("-h", "--help"):
+        print(USAGE)
+        return 0 if argv else 1
+
+    extra = []
+    if "--" in argv:
+        i = argv.index("--")
+        argv, extra = argv[:i], argv[i + 1 :]
+
+    ap = Parser(prog="runagent", add_help=False, usage=USAGE)
+    ap.add_argument("-a")
+    src = ap.add_mutually_exclusive_group()
+    src.add_argument("-p")
+    src.add_argument("-f")
+    ap.add_argument("-d")
+    args = ap.parse_args(argv)
+
+    if args.a is None:
+        fail(f"runagent: -a is required ({' or '.join(AGENTS)})")
+    if args.a not in AGENTS:
+        fail(f"runagent: -a must be one of {', '.join(AGENTS)}, got {args.a!r}")
+
+    label = f"runagent[{args.a}]"
+    if args.f:
+        label += f" {os.path.basename(args.f)}"
+
+    try:
+        if args.p is not None:
+            prompt = args.p
+        elif args.f:
+            with open(args.f) as f:
+                prompt = f.read()
+        elif not sys.stdin.isatty():
+            prompt = sys.stdin.read()
+        else:
+            prompt = ""
+    except OSError as e:
+        fail(f"{label}: can't read prompt: {e}")
+
+    if not prompt.strip():
+        fail(f"{label}: no prompt (use -p, -f or stdin)")
+
+    cwd = os.path.expanduser(args.d) if args.d else None
+    cmd = build_cmd(args.a, extra)
+    if not shutil.which(cmd[0]):
+        fail(f"{label}: '{cmd[0]}' not found on PATH", 127)
+
+    try:
+        res = subprocess.run(cmd, input=prompt.rstrip() + FOOTER, text=True, cwd=cwd)
+    except OSError as e:
+        fail(f"{label}: failed to start: {e}")
+
+    if res.returncode != 0:
+        notify(f"{label}: agent exited with code {res.returncode} in {cwd or os.getcwd()}")
+    return res.returncode
+
+
+if __name__ == "__main__":
+    sys.exit(main())
