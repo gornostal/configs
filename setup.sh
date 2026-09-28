@@ -1,86 +1,50 @@
 #!/bin/bash
+# Link every config into place, overwriting whatever is there, so the repo is the
+# only copy. A real file or dir in the way is moved to <path>.bak.<timestamp>
+# first, so local edits that never made it into the repo are not lost.
 
-NVIM_CONFIG_DIR="$HOME/.config/nvim"
-TMUX_CONFIG_FILE="$HOME/.tmux.conf"
-FISH_CONFIG_DIR="$HOME/.config/fish"
-CLAUDE_CONFIG_DIR="$HOME/.claude"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+STAMP="$(date +%Y%m%d%H%M%S)"
 
-mkdir -p "$HOME/.config"
-mkdir -p "$CLAUDE_CONFIG_DIR"
+link() {
+    local src="$1" dest="$2"
+    if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
+        echo "ok        $dest"
+        return
+    fi
+    if [ -L "$dest" ]; then
+        echo "relink    $dest (was -> $(readlink "$dest"))"
+        rm "$dest"
+    elif [ -e "$dest" ]; then
+        # a plain `ln -sf` would delete a file, or nest the link inside a dir
+        echo "backup    $dest -> $dest.bak.$STAMP"
+        mv "$dest" "$dest.bak.$STAMP"
+    else
+        echo "link      $dest"
+    fi
+    mkdir -p "$(dirname "$dest")"
+    ln -s "$src" "$dest"
+}
 
-CLAUDE_COMMANDS_DIR="$CLAUDE_CONFIG_DIR/commands"
-if [ -e "$CLAUDE_COMMANDS_DIR" ]; then
-    echo "Claude commands already exist at $CLAUDE_COMMANDS_DIR, skipping setup."
-else
-    ln -s "$SCRIPT_DIR/claude-code/commands" "$CLAUDE_COMMANDS_DIR"
-    echo "Claude commands linked to $CLAUDE_COMMANDS_DIR"
-fi
+link "$SCRIPT_DIR/claude-code/commands" "$HOME/.claude/commands"
 
-mkdir -p "$HOME/bin"
 chmod +x "$SCRIPT_DIR"/bin/*
 for src in "$SCRIPT_DIR"/bin/*; do
-    dest="$HOME/bin/$(basename "$src")"
-    if [ -e "$dest" ]; then
-        echo "Tool $(basename "$src") already exists at $dest, skipping."
-    else
-        ln -s "$src" "$dest"
-        echo "Tool $(basename "$src") linked to $dest"
-    fi
+    link "$src" "$HOME/bin/$(basename "$src")"
 done
 
-if [ -e "$NVIM_CONFIG_DIR" ]; then
-    echo "Neovim config already exists at $NVIM_CONFIG_DIR, skipping setup."
-else
-    ln -s "$SCRIPT_DIR/nvim" "$NVIM_CONFIG_DIR"
-    echo "Neovim config linked to $NVIM_CONFIG_DIR"
-fi
+link "$SCRIPT_DIR/nvim" "$HOME/.config/nvim"
 
-if [ -e "$TMUX_CONFIG_FILE" ]; then
-    echo "Tmux config already exists at $TMUX_CONFIG_FILE, skipping setup."
-else
-    ln -s "$SCRIPT_DIR/tmux/.tmux.conf" "$TMUX_CONFIG_FILE"
-    echo "Tmux config linked to $TMUX_CONFIG_FILE"
-fi
+link "$SCRIPT_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
+chmod +x "$SCRIPT_DIR"/tmux/scripts/*.sh
+link "$SCRIPT_DIR/tmux/scripts" "$HOME/.config/tmux/scripts"
 
-TMUX_SCRIPTS_DIR="$HOME/.config/tmux/scripts"
-if [ -e "$TMUX_SCRIPTS_DIR" ]; then
-    echo "Tmux scripts dir already exists at $TMUX_SCRIPTS_DIR, skipping setup."
-else
-    mkdir -p "$HOME/.config/tmux"
-    ln -s "$SCRIPT_DIR/tmux/scripts" "$TMUX_SCRIPTS_DIR"
-    chmod +x "$SCRIPT_DIR"/tmux/scripts/*.sh
-    echo "Tmux scripts linked to $TMUX_SCRIPTS_DIR"
-fi
-
-mkdir -p "$FISH_CONFIG_DIR/functions" "$FISH_CONFIG_DIR/conf.d"
-
-for src in config.fish; do
-    dest="$FISH_CONFIG_DIR/$src"
-    if [ -e "$dest" ]; then
-        echo "Fish $src already exists at $dest, skipping."
-    else
-        ln -s "$SCRIPT_DIR/fish/$src" "$dest"
-        echo "Fish $src linked to $dest"
-    fi
+# Fish is linked file by file: ~/.config/fish also holds machine-local state
+# (fish_variables, installer-written completions) that must stay out of the repo.
+link "$SCRIPT_DIR/fish/config.fish" "$HOME/.config/fish/config.fish"
+for src in "$SCRIPT_DIR"/fish/functions/*.fish; do
+    link "$src" "$HOME/.config/fish/functions/$(basename "$src")"
 done
-
-for src in fcd.fish fish_prompt.fish __log_dir.fish dotenv.fish; do
-    dest="$FISH_CONFIG_DIR/functions/$src"
-    if [ -e "$dest" ]; then
-        echo "Fish function $src already exists at $dest, skipping."
-    else
-        ln -s "$SCRIPT_DIR/fish/functions/$src" "$dest"
-        echo "Fish function $src linked to $dest"
-    fi
-done
-
-for src in omf.fish rustup.fish; do
-    dest="$FISH_CONFIG_DIR/conf.d/$src"
-    if [ -e "$dest" ]; then
-        echo "Fish conf.d/$src already exists at $dest, skipping."
-    else
-        ln -s "$SCRIPT_DIR/fish/conf.d/$src" "$dest"
-        echo "Fish conf.d/$src linked to $dest"
-    fi
+for src in "$SCRIPT_DIR"/fish/conf.d/*.fish; do
+    link "$src" "$HOME/.config/fish/conf.d/$(basename "$src")"
 done

@@ -8,6 +8,7 @@ exit, missing binary), runagent calls `notify` too.
 import argparse
 import glob
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -51,8 +52,10 @@ class Parser(argparse.ArgumentParser):
 def fix_path():
     """cron runs with a bare PATH; add the dirs where agents and notify live."""
     extra = [os.path.join(HOME, "bin"), os.path.join(HOME, ".local/bin")]
-    nvm = sorted(glob.glob(os.path.join(HOME, ".nvm/versions/node/*/bin")), reverse=True)
-    extra += nvm[:1]
+    nvm = glob.glob(os.path.join(HOME, ".nvm/versions/node/v*/bin"))
+    # newest by number, not by string: v24 > v9
+    version = lambda p: [int(n) for n in re.findall(r"\d+", p.split("/")[-2])]
+    extra += sorted(nvm, key=version)[-1:]
     parts = os.environ.get("PATH", "/usr/bin:/bin").split(os.pathsep)
     os.environ["PATH"] = os.pathsep.join([p for p in extra if p not in parts] + parts)
 

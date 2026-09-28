@@ -8,7 +8,13 @@ When doing any significant modifications, change this file also.
 
 ## Activation
 
-Run `setup.sh` to activate all configs. It symlinks the Neovim, Tmux, Fish, and Claude Code configs into their standard locations, skipping any that already exist.
+Run `setup.sh` to activate all configs. It symlinks the Neovim, Tmux, Fish, and Claude Code configs (and `bin/` tools) into their standard locations, **overwriting** whatever is there so the repo is the only copy. It is safe to re-run:
+
+- already linked to the repo → left alone (`ok`)
+- a symlink pointing elsewhere → replaced (`relink`)
+- a real file or directory → moved to `<path>.bak.<timestamp>`, then linked (`backup`). Check the backup for local edits worth porting into the repo, then delete it.
+
+Every `*.fish` in `fish/functions/` and `fish/conf.d/` is linked automatically, so adding one needs no `setup.sh` change.
 
 ```bash
 ./setup.sh
@@ -291,8 +297,13 @@ fish/
     ├── fcd.fish         # Fuzzy cd from dir history, 100 most recent dirs (Ctrl+g)
     ├── fish_prompt.fish # Custom prompt with git/hg branch and dirty indicator
     ├── __log_dir.fish   # Logs every visited dir to dir_history on PWD change
-    └── dotenv.fish      # Load KEY=value pairs from a .env file into the shell
+    ├── dotenv.fish      # Load KEY=value pairs from a .env file into the shell
+    └── nvm.fish         # Forwards `nvm` to bash (nvm.sh is bash-only)
 ```
+
+`setup.sh` links each fish file individually rather than the whole `~/.config/fish`
+dir, because that dir also holds machine-local state (`fish_variables` with universal
+vars/secrets, `completions/` written by installers) that must stay out of the repo.
 
 ### Notable abbreviations / aliases
 
@@ -342,6 +353,13 @@ sudo tar -C /usr/local -xzf goX.Y.Z.linux-amd64.tar.gz
 ```
 
 Check the current release at <https://go.dev/dl/>. No `GOPATH` is set; Go defaults to `~/go`.
+
+### Node / nvm
+
+`config.fish` puts the **newest** node under `~/.nvm/versions/node/` on `PATH` (fish
+globs sort numerically; `runagent` picks the same one). nvm's `default` alias is
+ignored. `nvm` forwards to bash, so `nvm install`/`ls`/`uninstall` work, but `nvm use`
+cannot change the fish shell's `PATH` — after installing a version, open a new shell.
 
 ### Android SDK
 

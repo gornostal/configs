@@ -98,18 +98,12 @@ set -gx AWS_PROFILE default-mfa
 source ~/.config/fish/functions/__log_dir.fish
 bind \cg 'fcd; commandline -f repaint'
 
-# Node via nvm. nvm.sh is a bash script fish cannot source, so resolve the
-# `default` alias here and prepend that version's bin to PATH. Prepending to
-# PATH (not fish_user_paths) keeps it ahead of ~/.npm-global/bin and leaves no
-# stale entry behind when the default version changes. `nvm` itself is a
-# wrapper function in functions/nvm.fish.
-set -gx NVM_DIR $HOME/.nvm
-if test -f $NVM_DIR/alias/default
-    set -l __nvm_ver (__nvm_resolve_alias default)
-    if test -d $NVM_DIR/versions/node/$__nvm_ver/bin
-        set -gx PATH $NVM_DIR/versions/node/$__nvm_ver/bin $PATH
-    end
-end
+# Node: newest version nvm has installed (globs sort numerically, so v24 > v9).
+# Prepending to PATH (not fish_user_paths) keeps it ahead of ~/.npm-global/bin.
+# `nvm` (functions/nvm.fish) just forwards to bash, so after `nvm install` open
+# a new shell to pick the version up.
+set -l __node_bins $HOME/.nvm/versions/node/*/bin
+set -q __node_bins[1]; and set -gx PATH $__node_bins[-1] $PATH
 
 # Pager: mouse-wheel scrolling in less (git diff via delta, man, `L`). less has
 # supported --mouse since 5.07; it is off by default. -R keeps delta's colours,
