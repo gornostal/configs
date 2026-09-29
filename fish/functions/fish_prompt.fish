@@ -86,6 +86,14 @@ function fish_prompt
         set arrow "$arrow_color# "
     end
 
+    # Show the user name when it's not the usual one (e.g. `sudo -u`, `su`).
+    set -l user_info
+    set -l user $USER
+    test -n "$user"; or set user (id -un)
+    if test "$user" != olek
+        set user_info " $yellow($user)"
+    end
+
     set -l cwd $cyan(basename (prompt_pwd))
 
     set -l repo_info
@@ -99,5 +107,5 @@ function fish_prompt
         end
     end
 
-    echo -n -s $arrow ' '$cwd $repo_info $normal ' '
+    echo -n -s $arrow $user_info ' '$cwd $repo_info $normal ' '
 end

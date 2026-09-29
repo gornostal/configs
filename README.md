@@ -334,6 +334,9 @@ Font). `fish_prompt.fish` checks once per shell whether `fc-list` knows any font
 that codepoint and keeps the plain arrow (still yellow) if not, so machines without a
 Nerd Font never show a tofu box.
 
+When the shell runs as any user other than `olek` (`su`, `sudo -u`, another account
+using this config), a yellow `(username)` is shown after the arrow, before the dir.
+
 ### Directory history
 
 `__log_dir.fish` appends every visited dir to `~/.local/share/fish/dir_history`. `fcd`
