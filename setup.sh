@@ -36,7 +36,7 @@ done
 link "$SCRIPT_DIR/nvim" "$HOME/.config/nvim"
 
 link "$SCRIPT_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
-chmod +x "$SCRIPT_DIR"/tmux/scripts/*.sh
+chmod +x "$SCRIPT_DIR"/tmux/scripts/*.sh "$SCRIPT_DIR"/tmux/scripts/*.py
 link "$SCRIPT_DIR/tmux/scripts" "$HOME/.config/tmux/scripts"
 
 # Fish is linked file by file: ~/.config/fish also holds machine-local state

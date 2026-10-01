@@ -218,6 +218,7 @@ and user commands have to start with a capital.)
 tmux/
 ├── .tmux.conf
 └── scripts/
+    ├── agent_grid.py               # Alt+a popup: grid of live Claude/Codex pane previews + status badges
     ├── fuzzy_insert_path.sh        # Two-step fuzzy insert: dir picker, optional file picker (Tab)
     └── join_pane_from_session.sh   # Fuzzy-pick a pane from another session and join-pane it here
 ```
@@ -262,9 +263,39 @@ inward). Install the config on the remote first: clone this repo there and run
 | `Prefix T` | Move window to position 1 |
 | `Alt+c` | Fuzzy insert path from dir history — Enter inserts dir, Tab opens file picker under selected dir (no prefix) |
 | `Prefix j` | Fuzzy-pick a pane from another session and join-pane it into current window |
+| `Alt+a` | Agent grid — live previews of the current session's Claude/Codex panes with status badges; Enter jumps there (no prefix) |
 | `Prefix k` | Scroll up (page) |
 | `Alt+z` | Zoom/unzoom current pane (no prefix) |
 | `Alt+s` | Enter copy mode and search backward (no prefix) |
+
+### Agent grid (`Alt+a`)
+
+`agent_grid.py` (Python, stdlib only) opens in a `display-popup` and tiles every pane
+running Claude Code or Codex in the current session. Each tile shows the bottom of the pane's
+screen (colors kept, cut to the tile), refreshed every 0.5s. The tile title is the pane's
+directory plus a status badge, and the bottom border shows the agent and window number.
+
+| Key | Action |
+|-----|--------|
+| Arrows / `hjkl` | Move selection |
+| `1`..`9` | Select tile N |
+| `Enter` / `Space` | Jump to that pane (select its window and pane) and close |
+| `q` / `Esc` | Close |
+
+Agents are found by `#{pane_current_command}` (`claude`/`codex`), falling back to the
+foreground process's cmdline in `/proc` (npm-installed Codex runs as `node codex.js`).
+
+The badge comes from the last ~14 non-empty lines of the screen:
+
+- **! needs you** (red): a numbered menu with a cursor (`❯ 1.` / `› 1.`, i.e. a
+  permission/approval prompt), `Esc to cancel` (question dialog), or Codex's
+  `Press enter to confirm`.
+- **● working** (yellow): `esc to interrupt`, a Claude spinner line (`✢ Thinking… (12s`)
+  or Codex's `Working (`.
+- **✓ idle** (green): anything else.
+
+The patterns are at the top of the script. If Claude or Codex changes its UI, run
+`agent_grid.py --list` to print each agent pane and its detected status.
 
 ### Pane Navigation
 
