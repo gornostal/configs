@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # Fuzzy insert path into the current tmux pane.
-# Usage: fuzzy_insert_path.sh <pane_id>
+# Usage: fuzzy_insert_path.sh <pane_id> [cd]
 #
 # Step 1 — pick a dir from history (Enter = insert dir, Tab = also pick a file)
 # Step 2 — if Tab was pressed, fuzzy-pick a file under the selected dir
+#
+# With a second arg "cd" (used by the new-window binding), Enter runs
+# `cd <dir>` in the pane instead of just typing the path. Tab still inserts.
 
 result=$(cat ~/.local/share/fish/dir_history \
   | sort -u \
@@ -31,6 +34,8 @@ if [ "$key" = "tab" ]; then
   else
     tmux send-keys -t "$1" "$dir"
   fi
+elif [ "$2" = "cd" ]; then
+  tmux send-keys -t "$1" "cd $dir" Enter
 else
   tmux send-keys -t "$1" "$dir"
 fi

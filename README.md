@@ -219,7 +219,7 @@ tmux/
 ├── .tmux.conf
 └── scripts/
     ├── agent_grid.py               # Alt+a popup: grid of live Claude/Codex pane previews + status badges
-    ├── fuzzy_insert_path.sh        # Two-step fuzzy insert: dir picker, optional file picker (Tab)
+    ├── fuzzy_insert_path.sh        # Two-step fuzzy insert: dir picker, optional file picker (Tab); `cd` mode for new windows
     └── join_pane_from_session.sh   # Fuzzy-pick a pane from another session and join-pane it here
 ```
 
@@ -262,6 +262,7 @@ inward). Install the config on the remote first: clone this repo there and run
 | `Prefix h` | Split horizontally |
 | `Prefix T` | Move window to position 1 |
 | `Alt+c` | Fuzzy insert path from dir history — Enter inserts dir, Tab opens file picker under selected dir (no prefix) |
+| `Prefix c` | New window in the current pane's dir, then the same dir picker pops up and `cd`s into the chosen dir (Esc keeps the current dir) |
 | `Prefix j` | Fuzzy-pick a pane from another session and join-pane it into current window |
 | `Alt+a` | Agent grid — live previews of the current session's Claude/Codex panes with status badges; Enter jumps there (no prefix) |
 | `Prefix k` | Scroll up (page) |
