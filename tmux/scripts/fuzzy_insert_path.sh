@@ -8,13 +8,17 @@
 # With a second arg "cd" (used by the new-window binding), Enter runs
 # `cd <dir>` in the pane instead of just typing the path. Tab still inserts.
 
+# fzf --tmux defaults to a 50%-wide popup; on narrow clients (phone over SSH) use full width
+popup=--tmux
+[ "$(tmux display -p '#{client_width}')" -lt 100 ] && popup=--tmux=center,100%,50%
+
 result=$(cat ~/.local/share/fish/dir_history \
   | sort -u \
   | while IFS= read -r d; do
       expanded="${d/#\~/$HOME}"
       [ -d "$expanded" ] && echo "$d"
     done \
-  | fzf --tmux --expect=tab --prompt="dir: ")
+  | fzf "$popup" --expect=tab --prompt="dir: ")
 
 key=$(echo "$result" | head -1)
 dir=$(echo "$result" | tail -1)
@@ -28,7 +32,7 @@ if [ "$key" = "tab" ]; then
   else
     list_files() { find "$1" -type f -not -path '*/.git/*' -not -path '*/node_modules/*' 2>/dev/null | sed "s|^$1/||"; }
   fi
-  file=$(list_files "$expanded_dir" | fzf --tmux --prompt="file: ") || true
+  file=$(list_files "$expanded_dir" | fzf "$popup" --prompt="file: ") || true
   if [ -n "$file" ]; then
     tmux send-keys -t "$1" "$dir/$file"
   else
