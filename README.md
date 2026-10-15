@@ -227,7 +227,10 @@ tmux/
 
 - Prefix key: `Ctrl+a` (instead of default `Ctrl+b`)
 - Vi mode enabled
-- Mouse support
+- Mouse support — drag to select; releasing copies to the tmux buffer **and** the
+  Wayland clipboard (`copy-command 'wl-copy'`). Double/triple click copies a word/line.
+  `Enter` in copy mode copies too. Hold `Shift` while dragging to use the terminal's own
+  selection instead.
 - 10000 line scrollback history
 - Windows/panes start at index 1
 
