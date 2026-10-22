@@ -1,19 +1,39 @@
 #!/bin/sh
-# Toggle the single "main" kitty window: hide it if focused, show+focus it otherwise,
+# Toggle the single "main" kitty window: minimize it if focused, restore+focus it otherwise,
 # start it if not running.
 # Bound to Super+X via elementary custom shortcuts (io.elementary.settings-daemon.applications).
+#
+# Native Wayland: kitty can't focus itself (xdg-activation needs a token we don't have) and
+# its hide/show leaves the window unmapped on Gala. So kitty only minimizes itself (minimize.py
+# kitten), and Gala's DesktopIntegration D-Bus API finds, restores and focuses the window.
 SOCK=unix:@kitty-main
+CLASS=kitty-main
 KITTEN="$HOME/bin/kitten"
+GALA="org.pantheon.gala /org/pantheon/gala/DesktopInterface org.pantheon.gala.DesktopIntegration"
 
-# Gala/Wayland can leave a hidden kitty window unable to show again; use XWayland.
-state=$("$KITTEN" @ --to "$SOCK" ls 2>/dev/null) ||
-    exec "$HOME/bin/kitty" -o linux_display_server=x11 --listen-on "$SOCK" --detach
+"$KITTEN" @ --to "$SOCK" ls >/dev/null 2>&1 ||
+    exec "$HOME/bin/kitty" --class "$CLASS" --listen-on "$SOCK" --detach
 
-focused=$(printf '%s' "$state" | python3 -I -c 'import json,sys; print(any(w["is_focused"] for w in json.load(sys.stdin)))')
+# Gala's uid and focus state of the main window, as "<uid> <True|False>"
+set -- $(busctl --user --json=short call $GALA GetWindows | python3 -I -c '
+import json, sys
+for uid, props in json.load(sys.stdin)["data"][0]:
+    if props.get("wm-class", {}).get("data") == sys.argv[1]:
+        print(uid, props["has-focus"]["data"])
+        break
+' "$CLASS")
 
-if [ "$focused" = True ]; then
-    "$KITTEN" @ --to "$SOCK" resize-os-window --action=hide
+if [ -z "$1" ]; then
+    # Instance started the old way (XWayland, default class): kitty's hide/show works there.
+    focused=$("$KITTEN" @ --to "$SOCK" ls | python3 -I -c 'import json,sys; print(any(w["is_focused"] for w in json.load(sys.stdin)))')
+    if [ "$focused" = True ]; then
+        "$KITTEN" @ --to "$SOCK" resize-os-window --action=hide
+    else
+        "$KITTEN" @ --to "$SOCK" resize-os-window --action=show
+        "$KITTEN" @ --to "$SOCK" focus-window
+    fi
+elif [ "$2" = True ]; then
+    "$KITTEN" @ --to "$SOCK" kitten minimize.py
 else
-    "$KITTEN" @ --to "$SOCK" resize-os-window --action=show
-    "$KITTEN" @ --to "$SOCK" focus-window
+    busctl --user call $GALA FocusWindow t "$1"
 fi

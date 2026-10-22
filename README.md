@@ -421,7 +421,8 @@ Manager.
 ```
 kitty/                          # linked to Kitty's config directory (see below)
 ├── kitty.conf
-└── elementary-dark.conf        # Colors: elementary OS Terminal's built-in "dark" theme
+├── elementary-dark.conf        # Colors: elementary OS Terminal's built-in "dark" theme
+└── minimize.py                 # Kitten that minimizes the OS window (used by kitty-toggle)
 ```
 
 There is a single fixed theme, copied from elementary Terminal's `src/Themes.vala`.
@@ -446,8 +447,7 @@ from tmux (`Ctrl+Shift+Enter/T/N/←/→`) are unbound.
 Font, opacity, cursor, padding and the rest of the look are set in `kitty/kitty.conf`;
 they are not repeated here.
 
-Window decorations (title bar with close/maximize buttons) are on. The main instance runs
-under XWayland (see below), so Gala draws them. Toggling `hide_window_decorations` needs a
+Window decorations (title bar with close/maximize buttons) are on. Toggling `hide_window_decorations` needs a
 kitty restart; a config reload doesn't apply it.
 
 | Key | Action |
@@ -461,14 +461,31 @@ kitty restart; a config reload doesn't apply it.
 `bin/kitty-toggle` talks to a kitty instance listening on the abstract socket
 `@kitty-main` (kitty.conf sets `allow_remote_control socket-only`; the socket is passed
 via `--listen-on` so other kitty instances don't clash). If that instance is focused it
-is hidden, otherwise it is shown and focused; if it isn't running, it is started. Kitty
-windows opened any other way are not affected.
+is minimized, otherwise it is restored and focused; if it isn't running, it is started.
+Kitty windows opened any other way are not affected.
 
-The main instance starts with `-o linux_display_server=x11` (XWayland in a Wayland
-session). With Kitty 0.49.2 on Gala, native Wayland windows can stay hidden after
-`resize-os-window --action=hide`, even though subsequent `show` commands succeed.
-XWayland passed repeated hide/show checks. Restart an existing main Kitty instance
-for this launch option to take effect; reloading the config is not enough.
+The main instance runs as a native Wayland client with app-id `kitty-main` (`--class`), so
+the toggle can find it among other kitty windows. Neither of kitty's own Wayland mechanisms works on
+Gala:
+
+- `resize-os-window --action=hide` unmaps the surface; after `show`, the re-created toplevel
+  has no app-id or title and could stay invisible.
+- `focus-window` needs an xdg-activation token, which a script started from a global shortcut doesn't have.
+
+So the work is split between kitty and Gala:
+
+- **minimize**: `kitten @ kitten minimize.py` runs `kitty/minimize.py` inside kitty, which
+  calls `change_os_window_state(WINDOW_MINIMIZED)`. kitty has no built-in minimize action
+  on Linux.
+- **find / restore / focus**: Gala's D-Bus API `org.pantheon.gala.DesktopIntegration`
+  (`GetWindows` → window uid and `has-focus` by `wm-class`; `FocusWindow(uid)` unminimizes
+  and activates). Called with `busctl --user`.
+
+`busctl --user --json=short call org.pantheon.gala /org/pantheon/gala/DesktopInterface
+org.pantheon.gala.DesktopIntegration GetWindows` lists what Gala sees, which is handy
+for debugging. After changing the launch options, quit the main kitty instance; the next `Super+X`
+starts it with the new ones. If the running instance has no `kitty-main` window (started by an
+older version under XWayland), the toggle falls back to kitty's own hide/show, which works under X11.
 
 The global shortcut is not set by `setup.sh`. On elementary OS it lives in
 `io.elementary.settings-daemon.applications application-shortcuts` (System Settings →
