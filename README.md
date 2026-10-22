@@ -5,6 +5,7 @@ This project contains configs for apps that run via CLI.
 ## Instructions
 
 When doing any significant modifications, change this file also.
+Describe what a config does and why, but don't copy setting values (font size, opacity, colors, …) into this file — they go stale; the config file is the source of truth.
 
 ## Activation
 
@@ -431,7 +432,7 @@ set, otherwise `$XDG_CONFIG_HOME/kitty`, falling back to `~/.config/kitty`. This
 `kitty.conf` and all included theme files in the repo; edits need no copying or rerun
 of setup. Run setup with the same environment overrides used to launch Kitty.
 
-`auto_reload_config 0.1` reloads saved changes automatically. Restart Kitty once if
+Saved changes are reloaded automatically (`auto_reload_config`). Restart Kitty once if
 it was started before the config was linked, or with automatic reload disabled.
 `Ctrl+Shift+F5` manually reloads; `Ctrl+Shift+F6` shows the active configuration for
 checking which files Kitty loaded. Startup-only options still require a restart.
@@ -440,11 +441,8 @@ Kitty is a single pane; tmux does all splitting and tabbing. So kitty's layouts 
 reduced to `stack`, its tab bar is hidden, and the kitty shortcuts that would steal keys
 from tmux (`Ctrl+Shift+Enter/T/N/←/→`) are unbound.
 
-- Font: RobotoMono Nerd Font Mono 12, 110% line height
-- Catppuccin theme following the OS light/dark preference
-- 0.92 background opacity, no window decorations, padded window
-- Beam cursor with animated cursor trail
-- Copy on select, 20000 line scrollback
+Font, opacity, cursor, padding and the rest of the look are set in `kitty/kitty.conf`;
+they are not repeated here.
 
 | Key | Action |
 |-----|--------|
