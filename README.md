@@ -450,6 +450,12 @@ via `--listen-on` so other kitty instances don't clash). If that instance is foc
 is hidden, otherwise it is shown and focused; if it isn't running, it is started. Kitty
 windows opened any other way are not affected.
 
+The main instance starts with `-o linux_display_server=x11` (XWayland in a Wayland
+session). With Kitty 0.49.2 on Gala, native Wayland windows can stay hidden after
+`resize-os-window --action=hide`, even though subsequent `show` commands succeed.
+XWayland passed repeated hide/show checks. Restart an existing main Kitty instance
+for this launch option to take effect; reloading the config is not enough.
+
 The global shortcut is not set by `setup.sh`. On elementary OS it lives in
 `io.elementary.settings-daemon.applications application-shortcuts` (System Settings →
 Keyboard → Shortcuts → Custom) as `(1, '/home/olek/bin/kitty-toggle', {}, ['<Super>x'])`.

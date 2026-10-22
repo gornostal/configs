@@ -5,8 +5,9 @@
 SOCK=unix:@kitty-main
 KITTEN="$HOME/bin/kitten"
 
+# Gala/Wayland can leave a hidden kitty window unable to show again; use XWayland.
 state=$("$KITTEN" @ --to "$SOCK" ls 2>/dev/null) ||
-    exec "$HOME/bin/kitty" --listen-on "$SOCK" --detach
+    exec "$HOME/bin/kitty" -o linux_display_server=x11 --listen-on "$SOCK" --detach
 
 focused=$(printf '%s' "$state" | python3 -I -c 'import json,sys; print(any(w["is_focused"] for w in json.load(sys.stdin)))')
 
