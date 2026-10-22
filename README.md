@@ -446,6 +446,10 @@ from tmux (`Ctrl+Shift+Enter/T/N/←/→`) are unbound.
 Font, opacity, cursor, padding and the rest of the look are set in `kitty/kitty.conf`;
 they are not repeated here.
 
+Window decorations (title bar with close/maximize buttons) are on. The main instance runs
+under XWayland (see below), so Gala draws them. Toggling `hide_window_decorations` needs a
+kitty restart; a config reload doesn't apply it.
+
 | Key | Action |
 |-----|--------|
 | `Super+X` | Toggle the main kitty window (global shortcut, runs `kitty-toggle`) |
