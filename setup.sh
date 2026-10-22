@@ -35,7 +35,10 @@ done
 
 link "$SCRIPT_DIR/nvim" "$HOME/.config/nvim"
 
-link "$SCRIPT_DIR/kitty" "$HOME/.config/kitty"
+# Match Kitty's config directory overrides; link the whole directory so includes
+# and automatic themes always use the repo files too.
+KITTY_CONFIG_DEST="${KITTY_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/kitty}"
+link "$SCRIPT_DIR/kitty" "$KITTY_CONFIG_DEST"
 
 link "$SCRIPT_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
 chmod +x "$SCRIPT_DIR"/tmux/scripts/*.sh "$SCRIPT_DIR"/tmux/scripts/*.py

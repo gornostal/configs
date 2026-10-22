@@ -418,13 +418,23 @@ Manager.
 ## Kitty Configuration
 
 ```
-kitty/                          # linked to ~/.config/kitty
+kitty/                          # linked to Kitty's config directory (see below)
 ├── kitty.conf
 ├── current-theme.conf          # Catppuccin Mocha (managed by `kitten themes`)
 ├── dark-theme.auto.conf        # Mocha, used when the OS prefers dark
 ├── light-theme.auto.conf       # Latte, used when the OS prefers light
 └── no-preference-theme.auto.conf  # Mocha (Pantheon reports "no preference" by default)
 ```
+
+`setup.sh` symlinks the entire `kitty/` directory to `$KITTY_CONFIG_DIRECTORY` when
+set, otherwise `$XDG_CONFIG_HOME/kitty`, falling back to `~/.config/kitty`. This keeps
+`kitty.conf` and all included theme files in the repo; edits need no copying or rerun
+of setup. Run setup with the same environment overrides used to launch Kitty.
+
+`auto_reload_config 0.1` reloads saved changes automatically. Restart Kitty once if
+it was started before the config was linked, or with automatic reload disabled.
+`Ctrl+Shift+F5` manually reloads; `Ctrl+Shift+F6` shows the active configuration for
+checking which files Kitty loaded. Startup-only options still require a restart.
 
 Kitty is a single pane; tmux does all splitting and tabbing. So kitty's layouts are
 reduced to `stack`, its tab bar is hidden, and the kitty shortcuts that would steal keys
