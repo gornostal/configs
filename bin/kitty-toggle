@@ -1,0 +1,18 @@
+#!/bin/sh
+# Toggle the single "main" kitty window: hide it if focused, show+focus it otherwise,
+# start it if not running.
+# Bound to Super+X via elementary custom shortcuts (io.elementary.settings-daemon.applications).
+SOCK=unix:@kitty-main
+KITTEN="$HOME/bin/kitten"
+
+state=$("$KITTEN" @ --to "$SOCK" ls 2>/dev/null) ||
+    exec "$HOME/bin/kitty" --listen-on "$SOCK" --detach
+
+focused=$(printf '%s' "$state" | python3 -I -c 'import json,sys; print(any(w["is_focused"] for w in json.load(sys.stdin)))')
+
+if [ "$focused" = True ]; then
+    "$KITTEN" @ --to "$SOCK" resize-os-window --action=hide
+else
+    "$KITTEN" @ --to "$SOCK" resize-os-window --action=show
+    "$KITTEN" @ --to "$SOCK" focus-window
+fi

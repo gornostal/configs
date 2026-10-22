@@ -8,7 +8,7 @@ When doing any significant modifications, change this file also.
 
 ## Activation
 
-Run `setup.sh` to activate all configs. It symlinks the Neovim, Tmux, Fish, and Claude Code configs (and `bin/` tools) into their standard locations, **overwriting** whatever is there so the repo is the only copy. It is safe to re-run:
+Run `setup.sh` to activate all configs. It symlinks the Neovim, Tmux, Fish, Kitty, and Claude Code configs (and `bin/` tools) into their standard locations, **overwriting** whatever is there so the repo is the only copy. It is safe to re-run:
 
 - already linked to the repo → left alone (`ok`)
 - a symlink pointing elsewhere → replaced (`relink`)
@@ -415,6 +415,47 @@ appears after installing **Android SDK Command-line Tools** from Android Studio'
 Manager.
 
 
+## Kitty Configuration
+
+```
+kitty/                          # linked to ~/.config/kitty
+├── kitty.conf
+├── current-theme.conf          # Catppuccin Mocha (managed by `kitten themes`)
+├── dark-theme.auto.conf        # Mocha, used when the OS prefers dark
+├── light-theme.auto.conf       # Latte, used when the OS prefers light
+└── no-preference-theme.auto.conf  # Mocha (Pantheon reports "no preference" by default)
+```
+
+Kitty is a single pane; tmux does all splitting and tabbing. So kitty's layouts are
+reduced to `stack`, its tab bar is hidden, and the kitty shortcuts that would steal keys
+from tmux (`Ctrl+Shift+Enter/T/N/←/→`) are unbound.
+
+- Font: RobotoMono Nerd Font Mono 12, 110% line height
+- Catppuccin theme following the OS light/dark preference
+- 0.92 background opacity, no window decorations, padded window
+- Beam cursor with animated cursor trail
+- Copy on select, 20000 line scrollback
+
+| Key | Action |
+|-----|--------|
+| `Super+X` | Toggle the main kitty window (global shortcut, runs `kitty-toggle`) |
+| `Ctrl+=` / `Ctrl+-` / `Ctrl+0` | Font size bigger / smaller / reset |
+| `Ctrl+Shift+A` then `M` / `L` / `1` | Background more opaque / less opaque / fully opaque |
+
+### Quake-style toggle (`Super+X`)
+
+`bin/kitty-toggle` talks to a kitty instance listening on the abstract socket
+`@kitty-main` (kitty.conf sets `allow_remote_control socket-only`; the socket is passed
+via `--listen-on` so other kitty instances don't clash). If that instance is focused it
+is hidden, otherwise it is shown and focused; if it isn't running, it is started. Kitty
+windows opened any other way are not affected.
+
+The global shortcut is not set by `setup.sh`. On elementary OS it lives in
+`io.elementary.settings-daemon.applications application-shortcuts` (System Settings →
+Keyboard → Shortcuts → Custom) as `(1, '/home/olek/bin/kitty-toggle', {}, ['<Super>x'])`.
+Kitty's built-in `quick-access-terminal` kitten does not work here: Gala has no
+layer-shell support.
+
 ## Helper tools (`bin/`)
 
 `setup.sh` symlinks every file in `bin/` into `~/bin` (already on `PATH` via `config.fish`).
@@ -423,6 +464,7 @@ Manager.
 |------|-------------|
 | `notify <message>` | Send a plain-text Telegram message (max 200 chars, no markdown). No args → help. |
 | `runagent -a claude\|codex [-p PROMPT \| -f FILE] [-d DIR] [-- ARGS]` | Run Claude Code / Codex non-interactively (for cron). Prompt from `-p`, `-f` or stdin. |
+| `kitty-toggle` | Show/hide the single "main" kitty window, starting it if needed. Bound to `Super+X` (see [Kitty](#kitty-configuration)). |
 
 `notify` is Python (stdlib only). It reads `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
 from the environment, else from `.env` in the repo root (gitignored; values copied from
