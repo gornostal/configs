@@ -421,11 +421,13 @@ Manager.
 ```
 kitty/                          # linked to Kitty's config directory (see below)
 ├── kitty.conf
-├── current-theme.conf          # Catppuccin Mocha (managed by `kitten themes`)
-├── dark-theme.auto.conf        # Mocha, used when the OS prefers dark
-├── light-theme.auto.conf       # Latte, used when the OS prefers light
-└── no-preference-theme.auto.conf  # Mocha (Pantheon reports "no preference" by default)
+└── elementary-dark.conf        # Colors: elementary OS Terminal's built-in "dark" theme
 ```
+
+There is a single fixed theme, copied from elementary Terminal's `src/Themes.vala`.
+There are deliberately no `*.auto.conf` files, so kitty doesn't follow the OS
+light/dark preference. Don't run `kitten themes` to change it: it would write a
+`current-theme.conf` and a theme block into `kitty.conf`. Edit `elementary-dark.conf` instead.
 
 `setup.sh` symlinks the entire `kitty/` directory to `$KITTY_CONFIG_DIRECTORY` when
 set, otherwise `$XDG_CONFIG_HOME/kitty`, falling back to `~/.config/kitty`. This keeps
