@@ -234,6 +234,11 @@ tmux/
   selection instead.
 - 10000 line scrollback history
 - Windows/panes start at index 1
+- Kitty features passed through to apps: curly/colored underlines (`usstyle`), OSC 8
+  clickable hyperlinks, and `allow-passthrough` so the kitty graphics protocol works
+  (`kitten icat`, image previews in yazi/image.nvim). Passthrough lets programs in the
+  visible pane send raw escape sequences to the terminal, not just images.
+  `terminal-features` apply when a client attaches, so detach/reattach after changing them.
 
 #### Nested / remote tmux
 
