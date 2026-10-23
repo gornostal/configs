@@ -427,7 +427,10 @@ Manager.
 kitty/                          # linked to Kitty's config directory (see below)
 ├── kitty.conf
 ├── elementary-dark.conf        # Colors: elementary OS Terminal's built-in "dark" theme
-└── minimize.py                 # Kitten that minimizes the OS window (used by kitty-toggle)
+├── minimize.py                 # Kitten that minimizes the OS window (used by kitty-toggle)
+└── shaders/
+    ├── rounded-corners.pipeline  # Runs the shader below as a static (non-animated) effect
+    └── rounded-corners.slang     # Rounded window corners + drop shadow
 ```
 
 There is a single fixed theme, copied from elementary Terminal's `src/Themes.vala`.
@@ -452,8 +455,9 @@ from tmux (`Ctrl+Shift+Enter/T/N/←/→`) are unbound.
 Font, opacity, cursor, padding and the rest of the look are set in `kitty/kitty.conf`;
 they are not repeated here.
 
-Window decorations (title bar with close/maximize buttons) are on. Toggling `hide_window_decorations` needs a
-kitty restart; a config reload doesn't apply it.
+The title bar is hidden; `shaders/rounded-corners.slang` draws rounded corners and a drop
+shadow instead (needs `background_opacity` below 1). Toggling `hide_window_decorations`
+needs a kitty restart; a config reload doesn't apply it.
 
 | Key | Action |
 |-----|--------|
