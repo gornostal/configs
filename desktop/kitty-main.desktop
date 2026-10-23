@@ -1,0 +1,21 @@
+[Desktop Entry]
+# Launches/toggles the "main" kitty instance (see bin/kitty-toggle). The file name and
+# StartupWMClass match its Wayland app-id (--class kitty-main) so docks group the window
+# under this entry. Exec goes through sh because desktop entries don't expand $HOME.
+Version=1.0
+Type=Application
+Name=Kitty
+GenericName=Terminal emulator
+Comment=Show or hide the main kitty window
+Exec=sh -c "\\$HOME/bin/kitty-toggle"
+Icon=kitty
+Terminal=false
+StartupNotify=false
+StartupWMClass=kitty-main
+Categories=System;TerminalEmulator;
+Keywords=terminal;shell;tty;
+Actions=new-window;
+
+[Desktop Action new-window]
+Name=New Separate Window
+Exec=sh -c "\\$HOME/bin/kitty"

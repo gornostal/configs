@@ -40,6 +40,16 @@ link "$SCRIPT_DIR/nvim" "$HOME/.config/nvim"
 KITTY_CONFIG_DEST="${KITTY_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/kitty}"
 link "$SCRIPT_DIR/kitty" "$KITTY_CONFIG_DEST"
 
+for src in "$SCRIPT_DIR"/desktop/*.desktop; do
+    link "$src" "$HOME/.local/share/applications/$(basename "$src")"
+done
+# Icon=kitty only resolves if the icon is in the theme path; the installer's
+# ~/.local/kitty.app/share isn't on XDG_DATA_DIRS.
+KITTY_ICONS="$HOME/.local/kitty.app/share/icons/hicolor"
+for size in 256x256/apps/kitty.png scalable/apps/kitty.svg; do
+    [ -e "$KITTY_ICONS/$size" ] && link "$KITTY_ICONS/$size" "$HOME/.local/share/icons/hicolor/$size"
+done
+
 link "$SCRIPT_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
 chmod +x "$SCRIPT_DIR"/tmux/scripts/*.sh "$SCRIPT_DIR"/tmux/scripts/*.py
 link "$SCRIPT_DIR/tmux/scripts" "$HOME/.config/tmux/scripts"
