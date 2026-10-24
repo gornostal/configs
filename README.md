@@ -432,7 +432,7 @@ kitty/                          # linked to Kitty's config directory (see below)
 ├── minimize.py                 # Kitten that minimizes the OS window (used by kitty-toggle)
 └── shaders/
     ├── rounded-corners.pipeline  # Runs the shader below as a static (non-animated) effect
-    └── rounded-corners.slang     # Rounded window corners + drop shadow
+    └── rounded-corners.slang     # Rounded window corners, Dock-style edge + drop shadow
 ```
 
 There is a single fixed theme, copied from elementary Terminal's `src/Themes.vala`.
@@ -458,7 +458,11 @@ Font, opacity, cursor, padding and the rest of the look are set in `kitty/kitty.
 they are not repeated here.
 
 The title bar is hidden; `shaders/rounded-corners.slang` draws rounded corners and a drop
-shadow instead (needs `background_opacity` below 1). Toggling `hide_window_decorations`
+shadow instead (needs `background_opacity` below 1). The window edge copies elementary's
+Dock: a translucent dark outline outside it and a faint white highlight inside it, strongest
+along the top like a light reflection. The outline has to live in the shader: kitty's
+`window_border_width` only draws between splits, never around the OS window. Toggling
+`hide_window_decorations`
 needs a kitty restart; a config reload doesn't apply it.
 
 | Key | Action |
