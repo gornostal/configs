@@ -234,6 +234,8 @@ tmux/
   selection instead.
 - 10000 line scrollback history
 - Windows/panes start at index 1
+- Window tabs show a `Z` marker when the window has a zoomed pane (`Alt+z`). Activity
+  monitoring is off, so there is no "something changed" indicator.
 - Kitty features passed through to apps: curly/colored underlines (`usstyle`), OSC 8
   clickable hyperlinks, and `allow-passthrough` so the kitty graphics protocol works
   (`kitten icat`, image previews in yazi/image.nvim). Passthrough lets programs in the
