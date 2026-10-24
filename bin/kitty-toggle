@@ -1,11 +1,17 @@
 #!/bin/sh
 # Toggle the single "main" kitty window: minimize it if focused, restore+focus it otherwise,
 # start it if not running.
-# Bound to Super+X via elementary custom shortcuts (io.elementary.settings-daemon.applications).
+# Bound to Super+X via elementary custom shortcuts, not set by setup.sh: System Settings →
+# Keyboard → Shortcuts → Custom, stored in io.elementary.settings-daemon.applications
+# application-shortcuts as (1, '/home/olek/bin/kitty-toggle', {}, ['<Super>x']).
+# (kitty's quick-access-terminal kitten needs layer-shell, which Gala lacks.)
 #
 # Native Wayland: kitty can't focus itself (xdg-activation needs a token we don't have) and
 # its hide/show leaves the window unmapped on Gala. So kitty only minimizes itself (minimize.py
 # kitten), and Gala's DesktopIntegration D-Bus API finds, restores and focuses the window.
+# To see what Gala sees: busctl --user --json=short call $GALA GetWindows
+#
+# Launch options only apply to a new instance: quit the main kitty after changing them.
 SOCK=unix:@kitty-main
 CLASS=kitty-main
 KITTEN="$HOME/bin/kitten"

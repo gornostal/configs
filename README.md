@@ -1,579 +1,99 @@
 # My configs
 
-This project contains configs for apps that run via CLI.
+Configs for CLI apps (Neovim, Tmux, Fish, Kitty, Claude Code) plus a few helper scripts.
 
 ## Instructions
 
-When doing any significant modifications, change this file also.
-Describe what a config does and why, but don't copy setting values (font size, opacity, colors, …) into this file — they go stale; the config file is the source of truth.
+This file is an overview: what lives where and what it is for, a line or two per item.
+Details — how something works, why it is done that way, gotchas, install steps — go in
+comments next to the code they describe, so they are found where they are needed and
+change with it. Don't list keybindings, plugins or setting values here; the config files
+are the source of truth. When adding or removing a component, update this file.
 
 ## Activation
-
-Run `setup.sh` to activate all configs. It symlinks the Neovim, Tmux, Fish, Kitty, and Claude Code configs (and `bin/` tools) into their standard locations, **overwriting** whatever is there so the repo is the only copy. It is safe to re-run:
-
-- already linked to the repo → left alone (`ok`)
-- a symlink pointing elsewhere → replaced (`relink`)
-- a real file or directory → moved to `<path>.bak.<timestamp>`, then linked (`backup`). Check the backup for local edits worth porting into the repo, then delete it.
-
-Every `*.fish` in `fish/functions/` and `fish/conf.d/` is linked automatically, so adding one needs no `setup.sh` change.
 
 ```bash
 ./setup.sh
 ```
 
+Symlinks every config (and `bin/` tools) into its standard location, **overwriting**
+whatever is there so the repo is the only copy. Safe to re-run:
 
-## Neovim Configuration
+- already linked to the repo → left alone (`ok`)
+- a symlink pointing elsewhere → replaced (`relink`)
+- a real file or directory → moved to `<path>.bak.<timestamp>`, then linked (`backup`).
+  Check the backup for local edits worth porting into the repo, then delete it.
 
-```
-nvim/
-├── init.lua              # Entry point
-├── lua/
-│   ├── config/
-│   │   ├── options.lua   # Basic settings (line numbers, tabs, etc.)
-│   │   ├── keymaps.lua   # Key bindings
-│   │   └── run.lua       # :X — run the current file and show its output
-│   └── plugins/
-│       └── init.lua      # All plugins (LSP, completion, theme)
-└── .gitignore
-```
+New files in `bin/`, `fish/functions/`, `fish/conf.d/` and `desktop/` are picked up
+automatically. Not done by `setup.sh`: the `Super+X` global shortcut (see
+`bin/kitty-toggle`), TPM itself, and the Go toolchain (see `fish/config.fish`).
 
-On first launch of Neovim, lazy.nvim will auto-install all plugins. Then Mason will install the language servers (pyright for Python, omnisharp for .NET).
+## What's here
 
-## Plugins included
+### `nvim/` — Neovim
 
-| Plugin | Description |
-|--------|-------------|
-| **lazy.nvim** | Plugin manager |
-| **catppuccin** | Color scheme (mocha dark / latte light, follows `background`) |
-| **neoscroll.nvim** | Smooth scrolling animations |
-| **telescope.nvim** | Fuzzy finder for files, grep, buffers |
-| **flash.nvim** | Quick jumps with labels |
-| **gitsigns.nvim** | Git change indicators in the gutter |
-| **mason.nvim** | Language server installer |
-| **mason-lspconfig.nvim** | Auto-configures LSP servers from Mason |
-| **nvim-lspconfig** | LSP configuration |
-| **nvim-cmp** | Autocompletion engine |
-| **LuaSnip** | Snippet engine |
-| **nvim-treesitter** | Syntax highlighting and code parsing |
-| **roslyn.nvim** | Roslyn LSP for .NET with Razor/CSHTML support |
-| **neo-tree.nvim** | File tree sidebar (ASCII icons, no Nerd Font needed; dotfiles and gitignored files shown) |
-| **render-markdown.nvim** | In-buffer markdown rendering (headings, tables, code blocks, checkboxes) |
+lazy.nvim installs the plugins on first launch, then Mason installs the language servers
+(Python, .NET via Roslyn). Leader is `Space`; `<leader>fk` searches all keymaps.
 
-## Key bindings
+- `lua/config/` — options, keymaps, and `run.lua` (`:X` runs the current file into a
+  scratch split).
+- `lua/plugins/init.lua` — every plugin: Telescope, LSP + completion, treesitter, neo-tree,
+  gitsigns, flash, render-markdown, catppuccin. Icons are plain ASCII/Unicode; no Nerd
+  Font assumed.
 
-`Space` is the leader key.
+### `tmux/` — Tmux
 
-### General
+Prefix `Ctrl+a`, vi mode, mouse with copy to the Wayland clipboard. `.tmux.conf` has
+the bindings. Notable extras:
 
-| Key | Action |
-|-----|--------|
-| `<Esc>` | Clear search highlight |
-| `<leader>w` | Toggle line wrap |
-| `<leader>m` | Toggle markdown rendering (in a markdown buffer) |
-| `Ctrl+b` / `Ctrl+n` | Scroll view half a screen left / right (`zH`/`zL`; needs `nowrap`) |
-| `<leader>tg` | Toggle line numbers (git signs stay visible) |
-| `<leader>tt` | Toggle light/dark theme (catppuccin latte/mocha, session-only) |
-| `<leader>bd` | Delete current buffer |
-| `<leader>e` | Toggle file tree sidebar |
-| `<leader>o` | Reveal current file in the tree |
-| `H` (in tree) | Toggle hidden/filtered items |
+- `F12` — pass all keys through to a nested (SSH) tmux running this same config.
+- `scripts/agent_grid.py` (`Alt+a`) — popup grid of the session's Claude Code / Codex
+  panes with live previews and needs-you / working / idle badges.
+- `scripts/fuzzy_insert_path.sh` (`Alt+c`, `Prefix c`) — fuzzy pick a dir (and file)
+  from the fish dir history and insert or `cd` into it.
+- `scripts/join_pane_from_session.sh` (`Prefix j`) — pull a pane in from another session.
+- `scripts/ram_status.sh` — RAM usage in the status bar.
 
-### Window Navigation
+### `fish/` — Fish shell
 
-| Key | Action |
-|-----|--------|
-| `Ctrl+h` | Move to left window |
-| `Ctrl+j` | Move to lower window |
-| `Ctrl+k` | Move to upper window |
-| `Ctrl+l` | Move to right window |
+- `config.fish` — PATH (Go, Node via nvm, Android SDK, …), abbreviations, env vars.
+- `functions/fish_prompt.fish` — prompt with git/hg branch and dirty marker; shows the
+  user when it isn't the usual one and a padlock inside an `lfg unseal` session.
+- `functions/__log_dir.fish` + `fcd.fish` — log every visited dir; `Ctrl+g` fuzzy-jumps
+  back to one.
+- `functions/dotenv.fish`, `nvm.fish` — load a `.env`; run nvm through bash.
 
-### LSP (Language Server)
+Linked file by file, since `~/.config/fish` also holds machine-local state.
 
-| Key | Action |
-|-----|--------|
-| `gd` | Go to definition |
-| `gD` | Go to declaration |
-| `gr` | Find references |
-| `gi` | Go to implementation |
-| `K` | Show hover documentation |
-| `<leader>rn` | Rename symbol |
-| `<leader>ca` | Code actions |
-| `<leader>f` | Format file |
+### `kitty/` — Kitty terminal
 
-### Telescope (Fuzzy Finder)
+A single-pane terminal (tmux does splits and tabs) styled after elementary OS, on the
+Gala compositor. The whole directory is linked as Kitty's config dir.
 
-| Key | Action |
-|-----|--------|
-| `<leader>ff` | Find files |
-| `<leader>fg` | Live grep (search in files) |
-| `<leader>fb` | Find open buffers |
-| `<leader>fh` | Search help tags |
-| `<leader>fk` | Find keymaps |
-| `<leader>fp` | Print full file path |
-| `<leader>fr` | Recent files |
+- `kitty.conf` — look, keys, and the kitty shortcuts unbound so tmux gets them.
+- `elementary-dark.conf` — the one fixed color theme, from elementary Terminal.
+- `shaders/rounded-corners.*` — rounded corners, Dock-style edge and drop shadow (the
+  title bar is hidden).
+- `gala-blur.c` — `LD_PRELOAD` library that gets Gala to blur behind the window (frosted
+  glass); built by `setup.sh`.
+- `minimize.py` — kitten used by `kitty-toggle`.
 
-### Git (Gitsigns)
+### `bin/` — helper tools (linked into `~/bin`)
 
-| Key | Action |
-|-----|--------|
-| `]h` | Next hunk |
-| `[h` | Previous hunk |
-| `<leader>hp` | Preview hunk |
-| `<leader>hs` | Stage hunk |
-| `<leader>hr` | Reset hunk |
-| `<leader>hd` | Diff this |
+- `kitty-toggle` — show/hide/start the single "main" kitty window; bound to `Super+X`.
+- `notify <message>` — send a short Telegram message (credentials from `.env`).
+- `runagent` — run Claude Code or Codex non-interactively (cron), with `notify` on
+  failure. `runagent` with no args prints usage.
 
-### Flash
+### `desktop/`
 
-| Key | Action |
-|-----|--------|
-| `s` | Flash jump |
-| `S` | Flash Treesitter |
-| `r` | Remote Flash (operator-pending) |
-| `R` | Treesitter search |
-| `Ctrl+s` | Toggle Flash search (command-line) |
+`kitty-main.desktop` — launcher entry for the main kitty window, so docks group it.
 
-### Git Diff
+### `claude-code/`
 
-| Key | Action |
-|-----|--------|
-| `<leader>gs` | Git status (fuzzy find changed files) |
-| `<leader>diff` | Show unstaged changes + new files |
-| `<leader>dic` | Show staged changes (git diff --cached) |
+`commands/` — user-level slash commands, linked to `~/.claude/commands`.
 
-### Markdown
+### `usbc-monitor-hotplug/`
 
-`render-markdown.nvim` renders markdown inside the real buffer — headings, tables, code
-blocks, bullets, checkboxes and block quotes are drawn as virtual text, and the raw text
-comes back on whichever line the cursor is on. No browser, no external renderer.
-
-Icons are configured as plain ASCII/Unicode (`#`, `[ ]`, `•`) to match the rest of this
-setup, which does not assume a Nerd Font. Sign-column icons are off so gitsigns keeps
-the gutter. LaTeX rendering is disabled (it needs the `latex2text` CLI).
-
-The `markdown` and `markdown_inline` treesitter parsers ship with Neovim, so nothing needs
-installing. Since nvim-treesitter is on its `main` branch, highlighting is opt-in per
-buffer — the treesitter spec has a `FileType markdown` autocmd calling
-`vim.treesitter.start()`, which is also what syntax-highlights fenced code blocks.
-
-| Key | Action |
-|-----|--------|
-| `<leader>m` | Toggle rendering on/off |
-
-`:RenderMarkdown` also takes `enable`/`disable`/`toggle`/`expand`/`contract`/`log`/`debug`.
-
-### Running the current file
-
-`:X` runs the current file as an executable (it must be `chmod +x`) and streams both
-stdout and stderr into a `[Run Output]` scratch split at the bottom. The file is saved
-first, and the process runs with the file's own directory as the working directory. The
-first line echoes the command, the last reports exit code and elapsed time. Output is a
-normal buffer, so it can be searched, yanked and folded; `q` closes the split.
-
-| Command | Action |
-|---------|--------|
-| `:X arg1 arg2` | Run `./current-file arg1 arg2`, output into the scratch split |
-| `:X!` | Run in a real terminal split instead — for programs that read stdin |
-| `:XX` | Re-run with the previous arguments |
-
-Runs are asynchronous, so Neovim stays usable while a long process streams output; a new
-`:X` kills the previous run. (`:x` itself can't be used — it's Neovim's write-and-quit,
-and user commands have to start with a capital.)
-
-### Autocompletion
-
-| Key | Action |
-|-----|--------|
-| `Tab` | Next completion item / expand snippet |
-| `Shift+Tab` | Previous completion item |
-| `Enter` | Accept completion |
-| `Ctrl+Space` | Trigger completion manually |
-| `Ctrl+e` | Abort completion |
-| `Ctrl+b` | Scroll docs up |
-| `Ctrl+f` | Scroll docs down |
-
-### Smooth Scrolling
-
-| Key | Action |
-|-----|--------|
-| `Ctrl+u` | Scroll up (half page) |
-| `Ctrl+d` | Scroll down (half page) |
-| `Ctrl+f` | Scroll down (full page) |
-| `zt` | Scroll cursor to top |
-| `zz` | Scroll cursor to center |
-| `zb` | Scroll cursor to bottom |
-
-### Visual Mode
-
-| Key | Action |
-|-----|--------|
-| `<` | Indent left (stay in visual) |
-| `>` | Indent right (stay in visual) |
-| `J` | Move selected lines down |
-| `K` | Move selected lines up |
-
-
-## Tmux Configuration
-
-```
-tmux/
-├── .tmux.conf
-└── scripts/
-    ├── agent_grid.py               # Alt+a popup: grid of live Claude/Codex pane previews + status badges
-    ├── fuzzy_insert_path.sh        # Two-step fuzzy insert: dir picker, optional file picker (Tab); `cd` mode for new windows
-    └── join_pane_from_session.sh   # Fuzzy-pick a pane from another session and join-pane it here
-```
-
-### Features
-
-- Prefix key: `Ctrl+a` (instead of default `Ctrl+b`)
-- Vi mode enabled
-- Mouse support — drag to select; releasing copies to the tmux buffer **and** the
-  Wayland clipboard (`copy-command 'wl-copy'`). Double/triple click copies a word/line.
-  `Enter` in copy mode copies too. Hold `Shift` while dragging to use the terminal's own
-  selection instead.
-- 10000 line scrollback history
-- Windows/panes start at index 1
-- Window tabs show a `Z` marker when the window has a zoomed pane (`Alt+z`). Activity
-  monitoring is off, so there is no "something changed" indicator.
-- Kitty features passed through to apps: curly/colored underlines (`usstyle`), OSC 8
-  clickable hyperlinks, and `allow-passthrough` so the kitty graphics protocol works
-  (`kitten icat`, image previews in yazi/image.nvim). Passthrough lets programs in the
-  visible pane send raw escape sequences to the terminal, not just images.
-  `terminal-features` apply when a client attaches, so detach/reattach after changing them.
-
-#### Nested / remote tmux
-
-When you SSH into another host that runs this **same** config, both the local and
-remote tmux share the `Ctrl+a`/`Ctrl+s` prefix and every `Alt`/`Shift` no-prefix
-binding, so the local tmux would intercept them all. Press `F12` to flip the local
-tmux into a passthrough ("off") state where every keystroke is forwarded to the
-remote tmux — the status bar changes color while in this mode. Press `F12` again to
-take control back. It nests to arbitrary depth (press `F12` once per level to step
-inward). Install the config on the remote first: clone this repo there and run
-`./setup.sh`.
-
-### Plugins (via TPM)
-
-| Plugin | Description |
-|--------|-------------|
-| **tpm** | Tmux Plugin Manager |
-| **tmux-sensible** | Sensible defaults |
-| **tmux-resurrect** | Save/restore sessions |
-| **tmux-copycat** | Enhanced search |
-
-### Key bindings
-
-| Key | Action |
-|-----|--------|
-| `Ctrl+a` | Prefix (send with `Ctrl+a Ctrl+a`) |
-| `F12` | Toggle passthrough to a nested/remote tmux — mutes local tmux so keys go to the inner session; press again to return (status bar changes color) |
-| `Prefix r` | Reload config |
-| `Prefix v` | Split vertically |
-| `Prefix h` | Split horizontally |
-| `Prefix T` | Move window to position 1 |
-| `Alt+c` | Fuzzy insert path from dir history — Enter inserts dir, Tab opens file picker under selected dir (no prefix) |
-| `Prefix c` | New window in the current pane's dir, then the same dir picker pops up and `cd`s into the chosen dir (Esc keeps the current dir) |
-| `Prefix j` | Fuzzy-pick a pane from another session and join-pane it into current window |
-| `Alt+a` | Agent grid — live previews of the current session's Claude/Codex panes with status badges; Enter jumps there (no prefix) |
-| `Prefix k` | Scroll up (page) |
-| `Alt+z` | Zoom/unzoom current pane (no prefix) |
-| `Alt+s` | Enter copy mode and search backward (no prefix) |
-
-### Agent grid (`Alt+a`)
-
-`agent_grid.py` (Python, stdlib only) opens in a `display-popup` and tiles every pane
-running Claude Code or Codex in the current session. Each tile shows the bottom of the pane's
-screen (colors kept, cut to the tile), refreshed every 0.5s. The tile title is the pane's
-directory plus a status badge, and the bottom border shows the agent and window number.
-
-| Key | Action |
-|-----|--------|
-| Arrows / `hjkl` | Move selection |
-| `1`..`9` | Select tile N |
-| `Enter` / `Space` | Jump to that pane (select its window and pane) and close |
-| `q` / `Esc` | Close |
-
-Agents are found by `#{pane_current_command}` (`claude`/`codex`), falling back to the
-foreground process's cmdline in `/proc` (npm-installed Codex runs as `node codex.js`).
-
-The badge comes from the last ~14 non-empty lines of the screen:
-
-- **! needs you** (red): a numbered menu with a cursor (`❯ 1.` / `› 1.`, i.e. a
-  permission/approval prompt), `Esc to cancel` (question dialog), or Codex's
-  `Press enter to confirm`.
-- **● working** (yellow): `esc to interrupt`, a Claude spinner line (`✢ Thinking… (12s`)
-  or Codex's `Working (`.
-- **✓ idle** (green): anything else.
-
-The patterns are at the top of the script. If Claude or Codex changes its UI, run
-`agent_grid.py --list` to print each agent pane and its detected status.
-
-### Pane Navigation
-
-| Key | Action |
-|-----|--------|
-| `Alt+Left` | Select pane left |
-| `Alt+Right` | Select pane right |
-| `Alt+Up` | Select pane up |
-| `Alt+Down` | Select pane down |
-
-### Window Navigation
-
-| Key | Action |
-|-----|--------|
-| `Shift+Left` | Previous window |
-| `Shift+Right` | Next window |
-| `Alt+1`..`Alt+9` | Go to window 1-9 |
-| `Alt+0` | Go to window 10 |
-
-
-## Fish Configuration
-
-```
-fish/
-├── config.fish          # Main config: PATH, abbreviations, aliases, env vars
-├── conf.d/
-│   ├── omf.fish         # Oh My Fish loader
-│   └── rustup.fish      # Cargo/Rust env
-└── functions/
-    ├── fcd.fish         # Fuzzy cd from dir history, 100 most recent dirs (Ctrl+g)
-    ├── fish_prompt.fish # Custom prompt with git/hg branch and dirty indicator
-    ├── __log_dir.fish   # Logs every visited dir to dir_history on PWD change
-    ├── dotenv.fish      # Load KEY=value pairs from a .env file into the shell
-    └── nvm.fish         # Forwards `nvm` to bash (nvm.sh is bash-only)
-```
-
-`setup.sh` links each fish file individually rather than the whole `~/.config/fish`
-dir, because that dir also holds machine-local state (`fish_variables` with universal
-vars/secrets, `completions/` written by installers) that must stay out of the repo.
-
-### Notable abbreviations / aliases
-
-| Abbr/Alias | Expands to |
-|------------|-----------|
-| `gs` | `git status` |
-| `ga` | `git add -A` |
-| `ss` / `sp` | `git stash save -u` / `git stash pop` |
-| `d` / `dc` / `dps` | docker / docker compose / docker ps |
-| `p` / `pc` | podman / podman compose |
-| `k` / `kl` | kubectl / kubectl logs |
-| `dn` | dotnet |
-| `v` | `nvim` |
-| `cv` | `claude` |
-| `l` | `ls -lA` |
-| `Ctrl+g` | `fcd` — fuzzy jump to dir from history |
-
-### Prompt
-
-The ➜ arrow is green normally and red when the last command failed. **Inside an
-`lfg unseal` session** (`LFG_SESSION` is set, sealed files are readable — see
-`~/projects/lfg/README.md`) the arrow is replaced by a yellow open padlock 󰿆
-(U+F0FC6, `nf-md-lock_open_variant`); it still turns red when the last command failed.
-
-The padlock is a Nerd Font glyph, but the terminal font itself need not be one —
-fontconfig fallback is enough (Guake on Roboto Mono picks it up from UbuntuMono Nerd
-Font). `fish_prompt.fish` checks once per shell whether `fc-list` knows any font with
-that codepoint and keeps the plain arrow (still yellow) if not, so machines without a
-Nerd Font never show a tofu box.
-
-When the shell runs as any user other than `olek` (`su`, `sudo -u`, another account
-using this config), a yellow `(username)` is shown after the arrow, before the dir.
-
-### Directory history
-
-`__log_dir.fish` appends every visited dir to `~/.local/share/fish/dir_history`. `fcd`
-reads it newest-first, drops duplicates, and offers the 100 most recent dirs that still exist.
-
-### Go toolchain
-
-`config.fish` puts `/usr/local/go/bin` and `~/go/bin` on `PATH`. Go is installed from the
-upstream tarball, **not** from apt — the Ubuntu/elementary repos pin `golang-go` to an old
-release. To install or upgrade it on a new machine:
-
-```fish
-curl -LO https://go.dev/dl/goX.Y.Z.linux-amd64.tar.gz
-sudo apt remove golang-go golang-src   # only if the apt version is present
-sudo rm -rf /usr/local/go
-sudo tar -C /usr/local -xzf goX.Y.Z.linux-amd64.tar.gz
-```
-
-Check the current release at <https://go.dev/dl/>. No `GOPATH` is set; Go defaults to `~/go`.
-
-### Node / nvm
-
-`config.fish` puts the **newest** node under `~/.nvm/versions/node/` on `PATH` (fish
-globs sort numerically; `runagent` picks the same one). nvm's `default` alias is
-ignored. `nvm` forwards to bash, so `nvm install`/`ls`/`uninstall` work, but `nvm use`
-cannot change the fish shell's `PATH` — after installing a version, open a new shell.
-
-### Android SDK
-
-`config.fish` exports `ANDROID_HOME`/`ANDROID_SDK_ROOT` (`~/Android/Sdk`) and puts the
-SDK's `platform-tools` on `PATH`. Android Studio itself is installed as a Flatpak, but the
-SDK lives on the host, so host-side tools (gradle, expo, `adb`) need these set explicitly.
-
-`platform-tools` is added via `fish_add_path`, which prepends to `$fish_user_paths` and so
-wins over `/usr/bin/adb` from the apt package `google-android-platform-tools-installer`
-(35.0.0, older than the SDK's 37.0.0). This matters: two `adb` versions fighting over port
-5037 is what leaves a connected device stuck in `offline` state.
-
-`cmdline-tools/latest/bin` (`sdkmanager`, `avdmanager`) is added only if it exists — it
-appears after installing **Android SDK Command-line Tools** from Android Studio's SDK
-Manager.
-
-
-## Kitty Configuration
-
-```
-kitty/                          # linked to Kitty's config directory (see below)
-├── kitty.conf
-├── elementary-dark.conf        # Colors: elementary OS Terminal's built-in "dark" theme
-├── minimize.py                 # Kitten that minimizes the OS window (used by kitty-toggle)
-├── gala-blur.c                 # LD_PRELOAD library: asks Gala to blur behind the window (frosted glass)
-└── shaders/
-    ├── rounded-corners.pipeline  # Runs the shader below as a static (non-animated) effect
-    └── rounded-corners.slang     # Rounded window corners, Dock-style edge + drop shadow
-```
-
-There is a single fixed theme, copied from elementary Terminal's `src/Themes.vala`.
-There are deliberately no `*.auto.conf` files, so kitty doesn't follow the OS
-light/dark preference. Don't run `kitten themes` to change it: it would write a
-`current-theme.conf` and a theme block into `kitty.conf`. Edit `elementary-dark.conf` instead.
-
-`setup.sh` symlinks the entire `kitty/` directory to `$KITTY_CONFIG_DIRECTORY` when
-set, otherwise `$XDG_CONFIG_HOME/kitty`, falling back to `~/.config/kitty`. This keeps
-`kitty.conf` and all included theme files in the repo; edits need no copying or rerun
-of setup. Run setup with the same environment overrides used to launch Kitty.
-
-Saved changes are reloaded automatically (`auto_reload_config`). Restart Kitty once if
-it was started before the config was linked, or with automatic reload disabled.
-`Ctrl+Shift+F5` manually reloads; `Ctrl+Shift+F6` shows the active configuration for
-checking which files Kitty loaded. Startup-only options still require a restart.
-
-Kitty is a single pane; tmux does all splitting and tabbing. So kitty's layouts are
-reduced to `stack`, its tab bar is hidden, and the kitty shortcuts that would steal keys
-from tmux (`Ctrl+Shift+Enter/T/N/←/→`) are unbound.
-
-Font, opacity, cursor, padding and the rest of the look are set in `kitty/kitty.conf`;
-they are not repeated here.
-
-The title bar is hidden; `shaders/rounded-corners.slang` draws rounded corners and a drop
-shadow instead (needs `background_opacity` below 1). The window edge copies elementary's
-Dock: a translucent dark outline outside it and a faint white highlight inside it, strongest
-along the top like a light reflection. The outline has to live in the shader: kitty's
-`window_border_width` only draws between splits, never around the OS window. Toggling
-`hide_window_decorations`
-needs a kitty restart; a config reload doesn't apply it.
-
-| Key | Action |
-|-----|--------|
-| `Super+X` | Toggle the main kitty window (global shortcut, runs `kitty-toggle`) |
-| `Ctrl+=` / `Ctrl+-` / `Ctrl+0` | Font size bigger / smaller / reset |
-| `Ctrl+Shift+A` then `M` / `L` / `1` | Background more opaque / less opaque / fully opaque |
-
-### Frosted glass (background blur)
-
-kitty's own `background_blur` doesn't work here: it needs the `ext-background-effect` or
-KDE blur Wayland protocol, and Gala offers neither. Gala can blur behind a window, but only
-through its private pantheon shell protocol (`io_elementary_pantheon_panel_v1.add_blur`,
-used by the Dock and Wingpanel), which kitty doesn't speak.
-
-`kitty/gala-blur.c` fills the gap. It is a small library, `LD_PRELOAD`ed into kitty, that
-wraps `wl_proxy_marshal_flags` to spot kitty's toplevel surfaces. After a surface's first
-buffer commit it sends `get_panel` + `add_blur` on kitty's own Wayland connection.
-`get_panel` alone only tags the surface; the window keeps normal (non-panel) behavior.
-The library unsets `LD_PRELOAD` on load so shells started in kitty don't inherit it.
-
-- `setup.sh` compiles it to `~/.local/lib/kitty-gala-blur.so` (needs `gcc` and
-  `libwayland-dev`) and rebuilds it when the source is newer.
-- `kitty-toggle` and the desktop entry's "New Separate Window" action start kitty with
-  it. A kitty started any other way is not blurred. Quit the main instance after
-  rebuilding, since it only loads the library at startup.
-- The blurred area's inset and corner radius are constants in `gala-blur.c` (logical
-  pixels). They must match `SHADOW`/`RADIUS` in the shader (physical pixels), so change
-  them together. The blur strength is fixed by Gala.
-- `background_opacity` sets how much of the blur shows through.
-
-To debug, start kitty with `WAYLAND_DEBUG=1` and the library preloaded, and grep for
-`add_blur`. Gala logs `Window tried to set blur region…` warnings if it rejects one.
-
-### Quake-style toggle (`Super+X`)
-
-`bin/kitty-toggle` talks to a kitty instance listening on the abstract socket
-`@kitty-main` (kitty.conf sets `allow_remote_control socket-only`; the socket is passed
-via `--listen-on` so other kitty instances don't clash). If that instance is focused it
-is minimized, otherwise it is restored and focused; if it isn't running, it is started.
-Kitty windows opened any other way are not affected.
-
-The main instance runs as a native Wayland client with app-id `kitty-main` (`--class`), so
-the toggle can find it among other kitty windows. Neither of kitty's own Wayland mechanisms works on
-Gala:
-
-- `resize-os-window --action=hide` unmaps the surface; after `show`, the re-created toplevel
-  has no app-id or title and could stay invisible.
-- `focus-window` needs an xdg-activation token, which a script started from a global shortcut doesn't have.
-
-So the work is split between kitty and Gala:
-
-- **minimize**: `kitten @ kitten minimize.py` runs `kitty/minimize.py` inside kitty, which
-  calls `change_os_window_state(WINDOW_MINIMIZED)`. kitty has no built-in minimize action
-  on Linux.
-- **find / restore / focus**: Gala's D-Bus API `org.pantheon.gala.DesktopIntegration`
-  (`GetWindows` → window uid and `has-focus` by `wm-class`; `FocusWindow(uid)` unminimizes
-  and activates). Called with `busctl --user`.
-
-`busctl --user --json=short call org.pantheon.gala /org/pantheon/gala/DesktopInterface
-org.pantheon.gala.DesktopIntegration GetWindows` lists what Gala sees, which is handy
-for debugging. After changing the launch options, quit the main kitty instance; the next `Super+X`
-starts it with the new ones. If the running instance has no `kitty-main` window (started by an
-older version under XWayland), the toggle falls back to kitty's own hide/show, which works under X11.
-
-The global shortcut is not set by `setup.sh`. On elementary OS it lives in
-`io.elementary.settings-daemon.applications application-shortcuts` (System Settings →
-Keyboard → Shortcuts → Custom) as `(1, '/home/olek/bin/kitty-toggle', {}, ['<Super>x'])`.
-Kitty's built-in `quick-access-terminal` kitten does not work here: Gala has no
-layer-shell support.
-
-## Helper tools (`bin/`)
-
-`setup.sh` symlinks every file in `bin/` into `~/bin` (already on `PATH` via `config.fish`).
-
-| Tool | Description |
-|------|-------------|
-| `notify <message>` | Send a plain-text Telegram message (max 200 chars, no markdown). No args → help. |
-| `runagent -a claude\|codex [-p PROMPT \| -f FILE] [-d DIR] [-- ARGS]` | Run Claude Code / Codex non-interactively (for cron). Prompt from `-p`, `-f` or stdin. |
-| `kitty-toggle` | Show/hide the single "main" kitty window, starting it if needed. Bound to `Super+X` (see [Kitty](#kitty-configuration)). |
-
-`notify` is Python (stdlib only). It reads `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
-from the environment, else from `.env` in the repo root (gitignored; values copied from
-`~/projects/assi-skills/.env`). It resolves its own symlink to find that file.
-
-`runagent` (Python, stdlib only) runs `claude -p` or `codex exec -` with the prompt on
-stdin, plus a footer telling the agent to `notify` the user if the task fails. `-a` is
-required. A missing/invalid `-a`, a missing prompt, an unreadable file or unknown options
-exit 1. Those errors, a missing agent binary and a non-zero agent exit also trigger
-`notify` (`runagent` with no args just prints help). Because cron's `PATH` is minimal, it
-adds `~/bin`, `~/.local/bin` and the newest `~/.nvm/versions/node/*/bin` to `PATH`.
-Arguments after `--` go to the agent.
-
-Agents run without prompts, but with a tool-call classifier instead of a full bypass:
-
-- claude: `--permission-mode auto` (auto mode: each tool call is classified, and risky ones
-  are blocked instead of prompted).
-- codex: `--approve-for-me` (approval requests go to an automatic reviewer; runs in the
-  `workspace-write` sandbox) with `-c sandbox_workspace_write.network_access=true`, since
-  that sandbox has no network by default and `notify` needs it. `--skip-git-repo-check`
-  lets it run outside a git repo.
-
-```cron
-0 7 * * * runagent -a codex -d ~/projects/foo -f ~/prompts/daily.md >> ~/agent.log 2>&1
-```
-
-
-## Claude Code Configuration
-
-```
-claude-code/
-└── commands/             # User-level slash commands (linked to ~/.claude/commands)
-```
+Workaround for external USB-C monitors not detected on hotplug. Installed separately;
+see its own README.

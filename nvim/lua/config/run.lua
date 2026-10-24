@@ -3,6 +3,10 @@
 --   :X arg1 arg2   run ./current-file arg1 arg2, stream stdout+stderr into a split
 --   :X!            same, but in a real terminal split (for programs that read stdin)
 --   :XX            re-run with the previous arguments
+--
+-- The file must be executable. It is saved first and runs in its own directory.
+-- Runs are async; a new :X kills the previous one. `q` closes the output split.
+-- (Not :x — that's write-and-quit, and user commands must start with a capital.)
 
 local M = {}
 

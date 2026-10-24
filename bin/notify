@@ -2,7 +2,8 @@
 """Send a short plain-text message to Telegram.
 
 Reads TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID from the environment,
-or from the .env file in the configs repo root.
+or from the .env file in the configs repo root (gitignored; values copied
+from ~/projects/assi-skills/.env).
 """
 import json
 import os

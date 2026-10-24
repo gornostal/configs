@@ -14,7 +14,12 @@
 // with a buffer (Gala creates the window then) the blur is added. Surfaces are
 // keyed by object id because EGL commits through wrapper proxies that share the id.
 //
-// Build: setup.sh (gcc -shared -fPIC gala-blur.c -lwayland-client).
+// Build: setup.sh (gcc -shared -fPIC gala-blur.c -lwayland-client). Only kitty started
+// by kitty-toggle or the desktop entry's "New Separate Window" loads it, and only at
+// startup, so quit the main instance after rebuilding.
+//
+// Debug: start kitty with WAYLAND_DEBUG=1 and this library preloaded, grep for add_blur.
+// Gala logs "Window tried to set blur region…" warnings if it rejects one.
 
 #define _GNU_SOURCE
 #include <dlfcn.h>

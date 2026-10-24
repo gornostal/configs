@@ -2,7 +2,11 @@ fish_add_path ~/bin ~/.local/bin ~/.dotnet/tools
 fish_add_path $HOME/.npm-global/bin
 fish_add_path $HOME/.local/share/solana/install/active_release/bin
 
-# Go toolchain (upstream tarball in /usr/local/go, not the apt package) + `go install` binaries
+# Go toolchain (upstream tarball in /usr/local/go, not the apt package) + `go install` binaries.
+# apt pins golang-go to an old release. Install/upgrade (latest at https://go.dev/dl/):
+#   curl -LO https://go.dev/dl/goX.Y.Z.linux-amd64.tar.gz
+#   sudo apt remove golang-go golang-src   # only if the apt version is present
+#   sudo rm -rf /usr/local/go; and sudo tar -C /usr/local -xzf goX.Y.Z.linux-amd64.tar.gz
 fish_add_path /usr/local/go/bin $HOME/go/bin
 
 # Android SDK — Android Studio is installed as a Flatpak, but the SDK itself

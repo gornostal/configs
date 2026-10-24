@@ -54,9 +54,11 @@ function fish_prompt
             return 1
         end
 
-        # Glyph shown instead of the arrow inside an `lfg unseal` session:
+        # Glyph shown instead of the arrow inside an `lfg unseal` session
+        # (LFG_SESSION set, sealed files readable; see ~/projects/lfg/README.md):
         # an open padlock, U+F0FC6 (nf-md-lock_open_variant). It needs a Nerd
-        # Font, so keep the arrow when fontconfig knows no font that has it.
+        # Font somewhere on the system (fontconfig fallback is enough, the
+        # terminal font needn't be one), so keep the arrow when there is none.
         set -g __lfg_unsealed_glyph '➜'
         if type -q fc-list; and test -n "$(fc-list ':charset=f0fc6' 2>/dev/null)"
             set -g __lfg_unsealed_glyph \U000f0fc6

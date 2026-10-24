@@ -26,6 +26,8 @@ SEP = "@@agent-grid-sep-7f3a@@"
 
 # --- status detection ---------------------------------------------------------
 
+# If Claude or Codex changes its UI, fix these patterns; `--list` shows what
+# each pane is detected as.
 # Only the bottom of the screen matters: that's where Claude/Codex draw the
 # spinner, the input box, and permission / question dialogs.
 NEEDS_YOU = [
