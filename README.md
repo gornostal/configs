@@ -430,6 +430,7 @@ kitty/                          # linked to Kitty's config directory (see below)
 ├── kitty.conf
 ├── elementary-dark.conf        # Colors: elementary OS Terminal's built-in "dark" theme
 ├── minimize.py                 # Kitten that minimizes the OS window (used by kitty-toggle)
+├── gala-blur.c                 # LD_PRELOAD library: asks Gala to blur behind the window (frosted glass)
 └── shaders/
     ├── rounded-corners.pipeline  # Runs the shader below as a static (non-animated) effect
     └── rounded-corners.slang     # Rounded window corners, Dock-style edge + drop shadow
@@ -470,6 +471,32 @@ needs a kitty restart; a config reload doesn't apply it.
 | `Super+X` | Toggle the main kitty window (global shortcut, runs `kitty-toggle`) |
 | `Ctrl+=` / `Ctrl+-` / `Ctrl+0` | Font size bigger / smaller / reset |
 | `Ctrl+Shift+A` then `M` / `L` / `1` | Background more opaque / less opaque / fully opaque |
+
+### Frosted glass (background blur)
+
+kitty's own `background_blur` doesn't work here: it needs the `ext-background-effect` or
+KDE blur Wayland protocol, and Gala offers neither. Gala can blur behind a window, but only
+through its private pantheon shell protocol (`io_elementary_pantheon_panel_v1.add_blur`,
+used by the Dock and Wingpanel), which kitty doesn't speak.
+
+`kitty/gala-blur.c` fills the gap. It is a small library, `LD_PRELOAD`ed into kitty, that
+wraps `wl_proxy_marshal_flags` to spot kitty's toplevel surfaces. After a surface's first
+buffer commit it sends `get_panel` + `add_blur` on kitty's own Wayland connection.
+`get_panel` alone only tags the surface; the window keeps normal (non-panel) behavior.
+The library unsets `LD_PRELOAD` on load so shells started in kitty don't inherit it.
+
+- `setup.sh` compiles it to `~/.local/lib/kitty-gala-blur.so` (needs `gcc` and
+  `libwayland-dev`) and rebuilds it when the source is newer.
+- `kitty-toggle` and the desktop entry's "New Separate Window" action start kitty with
+  it. A kitty started any other way is not blurred. Quit the main instance after
+  rebuilding, since it only loads the library at startup.
+- The blurred area's inset and corner radius are constants in `gala-blur.c` (logical
+  pixels). They must match `SHADOW`/`RADIUS` in the shader (physical pixels), so change
+  them together. The blur strength is fixed by Gala.
+- `background_opacity` sets how much of the blur shows through.
+
+To debug, start kitty with `WAYLAND_DEBUG=1` and the library preloaded, and grep for
+`add_blur`. Gala logs `Window tried to set blur region…` warnings if it rejects one.
 
 ### Quake-style toggle (`Super+X`)
 

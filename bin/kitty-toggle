@@ -11,8 +11,13 @@ CLASS=kitty-main
 KITTEN="$HOME/bin/kitten"
 GALA="org.pantheon.gala /org/pantheon/gala/DesktopInterface org.pantheon.gala.DesktopIntegration"
 
+# Preloaded into kitty for the frosted-glass background on Gala (kitty/gala-blur.c,
+# built by setup.sh); an empty value if it isn't built
+BLUR="$HOME/.local/lib/kitty-gala-blur.so"
+[ -e "$BLUR" ] || BLUR=
+
 "$KITTEN" @ --to "$SOCK" ls >/dev/null 2>&1 ||
-    exec "$HOME/bin/kitty" --class "$CLASS" --listen-on "$SOCK" --detach
+    LD_PRELOAD="$BLUR" exec "$HOME/bin/kitty" --class "$CLASS" --listen-on "$SOCK" --detach
 
 # Gala's uid and focus state of the main window, as "<uid> <True|False>"
 set -- $(busctl --user --json=short call $GALA GetWindows | python3 -I -c '

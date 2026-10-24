@@ -18,4 +18,4 @@ Actions=new-window;
 
 [Desktop Action new-window]
 Name=New Separate Window
-Exec=sh -c "\\$HOME/bin/kitty"
+Exec=sh -c "LD_PRELOAD=\\$HOME/.local/lib/kitty-gala-blur.so \\$HOME/bin/kitty"

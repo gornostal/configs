@@ -40,6 +40,19 @@ link "$SCRIPT_DIR/nvim" "$HOME/.config/nvim"
 KITTY_CONFIG_DEST="${KITTY_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-$HOME/.config}/kitty}"
 link "$SCRIPT_DIR/kitty" "$KITTY_CONFIG_DEST"
 
+# Background blur on Gala: a preload library that kitty-toggle starts kitty with.
+KITTY_BLUR_SO="$HOME/.local/lib/kitty-gala-blur.so"
+if [ ! -e "$KITTY_BLUR_SO" ] || [ "$SCRIPT_DIR/kitty/gala-blur.c" -nt "$KITTY_BLUR_SO" ]; then
+    mkdir -p "$(dirname "$KITTY_BLUR_SO")"
+    if gcc -O2 -shared -fPIC -o "$KITTY_BLUR_SO" "$SCRIPT_DIR/kitty/gala-blur.c" -lwayland-client; then
+        echo "build     $KITTY_BLUR_SO"
+    else
+        echo "FAILED    $KITTY_BLUR_SO (needs gcc and libwayland-dev; kitty runs unblurred)"
+    fi
+else
+    echo "ok        $KITTY_BLUR_SO"
+fi
+
 for src in "$SCRIPT_DIR"/desktop/*.desktop; do
     link "$src" "$HOME/.local/share/applications/$(basename "$src")"
 done

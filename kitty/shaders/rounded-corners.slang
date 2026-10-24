@@ -16,6 +16,8 @@
 import kitty_custom_shader_types;
 
 // All sizes are in physical pixels (roughly double the logical size on a 2x screen).
+// SHADOW and RADIUS are mirrored, in logical pixels, by INSET and CLIP_RADIUS in
+// ../gala-blur.c (the blurred area behind the window); change them together.
 static const float RADIUS = 20;        // corner radius of the visible window
 static const float SHADOW = 40;        // width of the band around it that holds the shadow
 static const float SHADOW_OFFSET = 4;  // shadow is shifted down by this much
