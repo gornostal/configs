@@ -114,3 +114,10 @@ set -q __node_bins[1]; and set -gx PATH $__node_bins[-1] $PATH
 # --wheel-lines sets how far one notch scrolls. While --mouse is on less owns
 # the mouse, so click-dragging to select text needs Shift held.
 set -gx LESS '-R --mouse --wheel-lines=3'
+
+# Highlights that read in both the light and dark terminal themes: reverse video
+# swaps the theme's own text and background. The defaults put a brblack background
+# under default-colored text, unreadable once brblack is the light theme's grey
+# (kitty/elementary-light.conf). Globals here override the universal variables.
+set -g fish_color_search_match --reverse
+set -g fish_color_selection --reverse

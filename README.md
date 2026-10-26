@@ -53,6 +53,9 @@ the bindings. Notable extras:
   from the fish dir history and insert or `cd` into it.
 - `scripts/join_pane_from_session.sh` (`Prefix j`) — pull a pane in from another session.
 - `scripts/ram_status.sh` — RAM usage in the status bar.
+- `scripts/theme.sh` — light/dark theme: follows the terminal (kitty follows the
+  desktop), or forced by the toggle at the end of the status bar (e.g. for Termius).
+  `nvim_background.sh` switches running Neovims, which don't follow on their own.
 
 ### `fish/` — Fish shell
 
@@ -71,7 +74,9 @@ A single-pane terminal (tmux does splits and tabs) styled after elementary OS, o
 Gala compositor. The whole directory is linked as Kitty's config dir.
 
 - `kitty.conf` — look, keys, and the kitty shortcuts unbound so tmux gets them.
-- `elementary-dark.conf` — the one fixed color theme, from elementary Terminal.
+- `elementary-dark.conf`, `elementary-light.conf` — color themes from elementary
+  Terminal; the `*-theme.auto.conf` files make kitty follow the desktop light/dark
+  setting.
 - `shaders/rounded-corners.*` — rounded corners, Dock-style edge and drop shadow (the
   title bar is hidden).
 - `gala-blur.c` — `LD_PRELOAD` library that gets Gala to blur behind the window (frosted
@@ -84,6 +89,7 @@ Gala compositor. The whole directory is linked as Kitty's config dir.
 - `notify <message>` — send a short Telegram message (credentials from `.env`).
 - `runagent` — run Claude Code or Codex non-interactively (cron), with `notify` on
   failure. `runagent` with no args prints usage.
+- `delta-themed` — git's pager: delta with light or dark colours to match the tmux theme.
 
 ### `desktop/`
 

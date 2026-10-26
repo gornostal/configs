@@ -146,7 +146,9 @@ return {
     config = function()
       require("catppuccin").setup({
         -- "auto" follows vim.o.background, so :set background=light swaps
-        -- mocha -> latte (see <leader>tt in keymaps.lua)
+        -- mocha -> latte. Neovim sets it from the terminal's background at
+        -- startup, tmux's theme hooks set it on a live switch (see
+        -- tmux/scripts/nvim_background.sh), and <leader>tt toggles it.
         flavour = "auto",
         background = { light = "latte", dark = "mocha" },
       })

@@ -1,0 +1,12 @@
+#!/bin/sh
+# git's pager (core.pager and interactive.diffFilter in ~/.gitconfig): delta with the
+# colours of the current light/dark theme. delta can't hold per-mode colours itself, so
+# they live in the [delta "dark-theme"] / [delta "light-theme"] feature sections of
+# ~/.gitconfig, picked here. Inside tmux the theme is @theme, set by
+# tmux/scripts/theme.sh (it also covers the forced light/dark of the status bar
+# toggle). Elsewhere delta detects the background and uses its own default colours.
+[ -n "$TMUX" ] && theme=$(tmux show -gqv @theme 2>/dev/null)
+case $theme in
+    light|dark) exec delta --features "$theme-theme" "$@" ;;
+    *) exec delta "$@" ;;
+esac
