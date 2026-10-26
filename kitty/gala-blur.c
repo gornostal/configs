@@ -14,6 +14,14 @@
 // with a buffer (Gala creates the window then) the blur is added. Surfaces are
 // keyed by object id because EGL commits through wrapper proxies that share the id.
 //
+// Animations: Gala's blur effect reallocates its full-size offscreen textures on every
+// frame in which the window's on-screen size changes, and the minimize and restore
+// animations scale the window on every frame, which makes them drop frames. So the blur
+// is removed when kitty asks to be minimized (kitty-toggle's minimize.py), and added
+// back once the restore animation is over: RESUME_DELAY_MS after the first configure
+// that activates the window again. Its listener is wrapped to see that configure.
+// Minimizing from the Dock or a shortcut is invisible to kitty and still animates blurred.
+//
 // Build: setup.sh (gcc -shared -fPIC gala-blur.c -lwayland-client). Only kitty started
 // by kitty-toggle or the desktop entry's "New Separate Window" loads it, and only at
 // startup, so quit the main instance after rebuilding.
@@ -27,6 +35,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <time.h>
 #include <wayland-client.h>
 
 // Insets of the blurred area from the surface edges, and its corner radius, in logical
@@ -37,6 +46,8 @@
 // add_blur is repeated for this many buffer commits, in case Gala's window actor
 // didn't exist yet the first time. Later resizes are followed by Gala itself.
 #define BLUR_COMMITS 3
+// Gala's restore animation lasts 200 ms (AnimationDuration.HIDE), plus a margin
+#define RESUME_DELAY_MS 250
 #define MAX_SURFACES 32
 #define MAX_ARGS 20 // WL_CLOSURE_MAX_ARGS, private to libwayland
 
@@ -60,33 +71,50 @@ static const struct wl_message panel_requests[] = {
     {"set_hide_mode", "u", no_types},
     {"request_visible_in_multitasking_view", "", no_types},
     {"add_blur", "uuuuu", no_types},
+    {"remove_blur", "", no_types},
 };
 static const struct wl_interface panel_interface = {
-    "io_elementary_pantheon_panel_v1", 1, 7, panel_requests, 0, NULL,
+    "io_elementary_pantheon_panel_v1", 1, 8, panel_requests, 0, NULL,
 };
 #define SHELL_GET_PANEL 0
 #define PANEL_ADD_BLUR 6
+#define PANEL_REMOVE_BLUR 7
 
 // Opcodes of the standard requests that are watched
 #define XDG_WM_BASE_GET_XDG_SURFACE 2
 #define XDG_SURFACE_GET_TOPLEVEL 1
+#define XDG_TOPLEVEL_SET_MINIMIZED 13
+#define XDG_TOPLEVEL_STATE_ACTIVATED 4
 #define WL_SURFACE_DESTROY 0
 #define WL_SURFACE_ATTACH 1
 #define WL_SURFACE_COMMIT 6
 
+// xdg_toplevel's events, in protocol order
+struct toplevel_listener {
+    void (*configure)(void *data, void *toplevel, int32_t width, int32_t height, struct wl_array *states);
+    void (*close)(void *data, void *toplevel);
+    void (*configure_bounds)(void *data, void *toplevel, int32_t width, int32_t height);
+    void (*wm_capabilities)(void *data, void *toplevel, struct wl_array *capabilities);
+};
+
 struct surface {
     uint32_t id;          // wl_surface id; 0 = free slot
     uint32_t xdg_id;      // its xdg_surface
-    int toplevel;
+    uint32_t toplevel_id; // its xdg_toplevel; 0 = not a toplevel (yet)
     int has_buffer;       // a buffer was attached since the last commit
     int blur_commits;     // add_blur requests sent so far
+    int paused;           // blur removed for a minimize, not restored yet
+    unsigned resume_gen;  // bumped to cancel a pending resume
     struct wl_proxy *surface;
     struct wl_proxy *panel;
+    const struct toplevel_listener *listener; // kitty's, which events are forwarded to
+    void *listener_data;
 };
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static struct surface surfaces[MAX_SURFACES];
 static struct wl_proxy *shell;
+static struct wl_display *display;
 static __thread int in_hook; // our own requests go straight through
 
 // libwayland's struct wl_proxy starts with struct wl_object, whose first field is the
@@ -96,11 +124,15 @@ proxy_interface(struct wl_proxy *proxy) {
     return *(const struct wl_interface **)proxy;
 }
 
+enum { BY_SURFACE, BY_XDG, BY_TOPLEVEL };
+
 static struct surface *
-find(uint32_t id, int by_xdg) {
-    for (int i = 0; i < MAX_SURFACES; i++)
-        if (surfaces[i].id && (by_xdg ? surfaces[i].xdg_id : surfaces[i].id) == id)
-            return &surfaces[i];
+find(uint32_t id, int by) {
+    for (int i = 0; i < MAX_SURFACES; i++) {
+        struct surface *s = &surfaces[i];
+        if (s->id && (by == BY_XDG ? s->xdg_id : by == BY_TOPLEVEL ? s->toplevel_id : s->id) == id)
+            return s;
+    }
     return NULL;
 }
 
@@ -120,9 +152,10 @@ wl_display_connect(const char *name) {
     static struct wl_display *(*real)(const char *);
     if (!real)
         real = dlsym(RTLD_NEXT, "wl_display_connect");
-    struct wl_display *display = real(name);
-    if (!display || shell)
-        return display;
+    struct wl_display *connected = real(name);
+    if (!connected || shell)
+        return connected;
+    display = connected;
 
     // Look the shell up on a private queue, so none of kitty's events are dispatched here.
     in_hook = 1;
@@ -148,6 +181,123 @@ blur(struct surface *s) {
     in_hook = 0;
 }
 
+// Gala doesn't disconnect its size_changed handler here, so each add_blur after a
+// remove_blur adds one more (cheap) handler; they go away when kitty quits.
+static void
+unblur(struct surface *s) {
+    in_hook = 1;
+    wl_proxy_marshal_flags(s->panel, PANEL_REMOVE_BLUR, NULL, 1, 0);
+    in_hook = 0;
+}
+
+struct resume {
+    struct surface *s;
+    unsigned gen;
+};
+
+// Thread that adds the blur back after the restore animation, unless the window was
+// minimized again (or destroyed) meanwhile. Requests are thread-safe in libwayland;
+// the flush is needed because kitty may sit idle in poll() with nothing to send.
+static void *
+resume_later(void *arg) {
+    struct resume r = *(struct resume *)arg;
+    free(arg);
+    nanosleep(&(struct timespec){0, RESUME_DELAY_MS * 1000000L}, NULL);
+    pthread_mutex_lock(&lock);
+    int resumed = r.s->id && r.s->paused && r.s->resume_gen == r.gen;
+    if (resumed) {
+        r.s->paused = 0;
+        blur(r.s);
+    }
+    pthread_mutex_unlock(&lock);
+    if (resumed)
+        wl_display_flush(display);
+    return NULL;
+}
+
+// Called with the lock held.
+static void
+schedule_resume(struct surface *s) {
+    struct resume *r = malloc(sizeof *r);
+    pthread_t thread;
+    pthread_attr_t attr;
+    if (r) {
+        *r = (struct resume){s, ++s->resume_gen};
+        pthread_attr_init(&attr);
+        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+        int failed = pthread_create(&thread, &attr, resume_later, r);
+        pthread_attr_destroy(&attr);
+        if (!failed)
+            return;
+        free(r);
+    }
+    // No thread: blur right away, at the cost of a choppy animation.
+    s->paused = 0;
+    blur(s);
+}
+
+static void
+toplevel_configure(void *data, void *toplevel, int32_t width, int32_t height, struct wl_array *states) {
+    struct surface *s = data;
+    pthread_mutex_lock(&lock);
+    const struct toplevel_listener *listener = s->listener;
+    void *listener_data = s->listener_data;
+    if (s->paused) {
+        uint32_t *state;
+        wl_array_for_each(state, states) if (*state == XDG_TOPLEVEL_STATE_ACTIVATED) {
+            schedule_resume(s);
+            break;
+        }
+    }
+    pthread_mutex_unlock(&lock);
+    if (listener)
+        listener->configure(listener_data, toplevel, width, height, states);
+}
+
+// The other events go straight through.
+static void
+toplevel_close(void *data, void *toplevel) {
+    struct surface *s = data;
+    if (s->listener)
+        s->listener->close(s->listener_data, toplevel);
+}
+
+static void
+toplevel_configure_bounds(void *data, void *toplevel, int32_t width, int32_t height) {
+    struct surface *s = data;
+    if (s->listener)
+        s->listener->configure_bounds(s->listener_data, toplevel, width, height);
+}
+
+static void
+toplevel_wm_capabilities(void *data, void *toplevel, struct wl_array *capabilities) {
+    struct surface *s = data;
+    if (s->listener)
+        s->listener->wm_capabilities(s->listener_data, toplevel, capabilities);
+}
+
+static const struct toplevel_listener toplevel_wrapper = {
+    toplevel_configure, toplevel_close, toplevel_configure_bounds, toplevel_wm_capabilities,
+};
+
+int
+wl_proxy_add_listener(struct wl_proxy *proxy, void (**implementation)(void), void *data) {
+    static int (*real)(struct wl_proxy *, void (**)(void), void *);
+    if (!real)
+        real = dlsym(RTLD_NEXT, "wl_proxy_add_listener");
+    if (in_hook || !shell || strcmp(proxy_interface(proxy)->name, "xdg_toplevel") != 0)
+        return real(proxy, implementation, data);
+
+    pthread_mutex_lock(&lock);
+    struct surface *s = find(wl_proxy_get_id(proxy), BY_TOPLEVEL);
+    if (s) {
+        s->listener = (const struct toplevel_listener *)implementation;
+        s->listener_data = data;
+    }
+    pthread_mutex_unlock(&lock);
+    return s ? real(proxy, (void (**)(void))&toplevel_wrapper, s) : real(proxy, implementation, data);
+}
+
 // Called with the lock held, before (sent = 0) and after (sent = 1) the request goes out.
 static void
 watch(struct wl_proxy *proxy, const char *iface, uint32_t opcode, union wl_argument *args, struct wl_proxy *ret, int sent) {
@@ -155,7 +305,7 @@ watch(struct wl_proxy *proxy, const char *iface, uint32_t opcode, union wl_argum
     struct surface *s;
 
     if (!sent && strcmp(iface, "wl_surface") == 0) {
-        if (!(s = find(id, 0)))
+        if (!(s = find(id, BY_SURFACE)))
             return;
         if (opcode == WL_SURFACE_ATTACH)
             s->has_buffer = args[0].o != NULL;
@@ -165,8 +315,16 @@ watch(struct wl_proxy *proxy, const char *iface, uint32_t opcode, union wl_argum
                 wl_proxy_destroy(s->panel);
             memset(s, 0, sizeof *s);
         }
+    } else if (!sent && strcmp(iface, "xdg_toplevel") == 0 && opcode == XDG_TOPLEVEL_SET_MINIMIZED) {
+        // Before the request, so the blur is gone when the animation starts
+        if ((s = find(id, BY_TOPLEVEL)) && s->panel) {
+            unblur(s);
+            s->paused = 1;
+            s->resume_gen++;
+        }
     } else if (sent && strcmp(iface, "wl_surface") == 0 && opcode == WL_SURFACE_COMMIT) {
-        if ((s = find(id, 0)) && s->toplevel && s->has_buffer && s->blur_commits < BLUR_COMMITS) {
+        if ((s = find(id, BY_SURFACE)) && s->toplevel_id && !s->paused && s->has_buffer &&
+            s->blur_commits < BLUR_COMMITS) {
             s->has_buffer = 0;
             s->blur_commits++;
             blur(s);
@@ -180,8 +338,8 @@ watch(struct wl_proxy *proxy, const char *iface, uint32_t opcode, union wl_argum
                 break;
             }
     } else if (sent && strcmp(iface, "xdg_surface") == 0 && opcode == XDG_SURFACE_GET_TOPLEVEL) {
-        if ((s = find(id, 1)))
-            s->toplevel = 1;
+        if ((s = find(id, BY_XDG)) && ret)
+            s->toplevel_id = wl_proxy_get_id(ret);
     }
 }
 
