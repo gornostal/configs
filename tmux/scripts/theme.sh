@@ -57,11 +57,14 @@ light="#073642 #FDF6E3 #073642 #dc322f #859900 #b58900 #268bd2 #d33682 #2aa198 #
         echo "set -g @tab_fg '#073642'"
         echo "set -g @tab_bg '#ddd6c1'"
         echo "set -g @tab_zoom_fg '#cb4b16'"
+        # fzf's light scheme draws matches in a dull teal, hard to see on cream
+        echo "set -g @fzf_colors 'light,hl:#cb4b16:bold,hl+:#cb4b16:bold,fg+:#073642,bg+:#eee8d5,gutter:-1,pointer:#d33682'"
     else
         echo "set -g status-style 'fg=white,bg=colour235'"
         echo "set -g @tab_fg colour250"
         echo "set -g @tab_bg colour237"
         echo "set -g @tab_zoom_fg colour215"
+        echo "set -g @fzf_colors dark"
     fi
 
     case $mode in light) icon="☀" ;; dark) icon="☾" ;; *) icon="◐" ;; esac

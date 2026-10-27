@@ -11,6 +11,8 @@
 # fzf --tmux defaults to a 50%-wide popup; on narrow clients (phone over SSH) use full width
 popup=--tmux
 [ "$(tmux display -p '#{client_width}')" -lt 100 ] && popup=--tmux=center,100%,50%
+# fzf can't detect a light background; colours for the tmux theme (theme.sh)
+colors=--color=$(tmux show -gqv @fzf_colors)
 
 result=$(cat ~/.local/share/fish/dir_history \
   | sort -u \
@@ -18,7 +20,7 @@ result=$(cat ~/.local/share/fish/dir_history \
       expanded="${d/#\~/$HOME}"
       [ -d "$expanded" ] && echo "$d"
     done \
-  | fzf "$popup" --expect=tab --prompt="dir: ")
+  | fzf "$popup" "$colors" --expect=tab --prompt="dir: ")
 
 key=$(echo "$result" | head -1)
 dir=$(echo "$result" | tail -1)
@@ -32,7 +34,7 @@ if [ "$key" = "tab" ]; then
   else
     list_files() { find "$1" -type f -not -path '*/.git/*' -not -path '*/node_modules/*' 2>/dev/null | sed "s|^$1/||"; }
   fi
-  file=$(list_files "$expanded_dir" | fzf "$popup" --prompt="file: ") || true
+  file=$(list_files "$expanded_dir" | fzf "$popup" "$colors" --prompt="file: ") || true
   if [ -n "$file" ]; then
     tmux send-keys -t "$1" "$dir/$file"
   else

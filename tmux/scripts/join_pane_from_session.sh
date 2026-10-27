@@ -24,9 +24,11 @@ fi
 # fzf --tmux defaults to a 50%-wide popup; on narrow clients (phone over SSH) use full width
 popup=--tmux
 [ "$(tmux display -p '#{client_width}')" -lt 100 ] && popup=--tmux=center,100%,50%
+# fzf can't detect a light background; colours for the tmux theme (theme.sh)
+colors=--color=$(tmux show -gqv @fzf_colors)
 
 picked=$(printf '%s\n' "$selection" \
-  | fzf "$popup" --with-nth=2.. --delimiter='\t' --prompt="pane: " \
+  | fzf "$popup" "$colors" --with-nth=2.. --delimiter='\t' --prompt="pane: " \
   | awk -F'\t' '{print $1}')
 
 [ -z "$picked" ] && exit 0
