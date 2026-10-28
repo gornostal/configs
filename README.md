@@ -38,7 +38,7 @@ lazy.nvim installs the plugins on first launch, then Mason installs the language
 - `lua/config/` — options, keymaps, and `run.lua` (`:X` runs the current file into a
   scratch split).
 - `lua/plugins/init.lua` — every plugin: Telescope, LSP + completion, treesitter, neo-tree,
-  gitsigns, flash, render-markdown, catppuccin. Icons are plain ASCII/Unicode; no Nerd
+  gitsigns, flash, render-markdown, solarized. Icons are plain ASCII/Unicode; no Nerd
   Font assumed.
 
 ### `tmux/` — Tmux

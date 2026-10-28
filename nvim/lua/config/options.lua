@@ -21,6 +21,8 @@ opt.incsearch = true
 opt.termguicolors = true
 opt.signcolumn = "yes"
 opt.cursorline = true
+-- Floats have no background of their own (transparent colorscheme), so outline them
+opt.winborder = "rounded"
 
 -- Behavior
 opt.splitright = true

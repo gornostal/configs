@@ -137,22 +137,36 @@ return {
     },
   },
 
-  -- Colorscheme
+  -- Colorscheme: Solarized, like kitty's elementary themes (kitty/elementary-*.conf)
+  -- and tmux's status bar (tmux/scripts/theme.sh). Follows vim.o.background: Neovim
+  -- sets it from the terminal's background at startup, tmux's theme hooks set it on
+  -- a live switch (tmux/scripts/nvim_background.sh), and <leader>tt toggles it;
+  -- changing it reloads the colorscheme.
   {
-    "catppuccin/nvim",
-    name = "catppuccin",
+    "maxmx03/solarized.nvim",
     lazy = false,
     priority = 1000,
     config = function()
-      require("catppuccin").setup({
-        -- "auto" follows vim.o.background, so :set background=light swaps
-        -- mocha -> latte. Neovim sets it from the terminal's background at
-        -- startup, tmux's theme hooks set it on a live switch (see
-        -- tmux/scripts/nvim_background.sh), and <leader>tt toggles it.
-        flavour = "auto",
-        background = { light = "latte", dark = "mocha" },
+      require("solarized").setup({
+        -- No editor background, so kitty's translucent, blurred one shows through.
+        -- The completion menu keeps its own, or it would blend into the code.
+        transparent = { enabled = true, pmenu = false },
+        on_colors = function()
+          if vim.o.background == "dark" then
+            -- elementary-dark puts Solarized on neutral grey with grey text, and
+            -- tmux's dark status bar is colour235
+            return { base0 = "#a5a5a5", base02 = "#3a3a3a", base03 = "#2e2e2e", base04 = "#262626" }
+          end
+          -- elementary-light uses the darker base02 for text, for more contrast
+          return { base00 = "#073642" }
+        end,
+        on_highlights = function()
+          -- Colours of their own: kitty keeps them translucent (see
+          -- transparent_background_colors in kitty/kitty.conf)
+          return { CursorLine = { bg = vim.o.background == "dark" and "#363636" or "#f5eedb" } }
+        end,
       })
-      vim.cmd.colorscheme("catppuccin")
+      vim.cmd.colorscheme("solarized")
     end,
   },
 
