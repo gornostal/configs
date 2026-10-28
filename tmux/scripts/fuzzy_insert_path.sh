@@ -7,6 +7,30 @@
 #
 # With a second arg "cd" (used by the new-window binding), Enter runs
 # `cd <dir>` in the pane instead of just typing the path. Tab still inserts.
+#
+# Picks are remembered per query: choose a dir after typing "conf" and the next
+# time "conf" is typed the cursor jumps to that dir instead of the best match.
+# Exact query only; pick another dir for the same query to overwrite it.
+
+# query<TAB>dir, one line per query
+memory=~/.local/share/fish/dir_picks
+
+# Queries are stored with whitespace trimmed and collapsed, as fzf ignores it:
+# "conf " and "conf" must find the same pick
+normalize() { awk '{ $1 = $1; print }' <<< "$1"; }
+
+# fzf result-event hook (see --bind below): print pos(N) of the dir remembered
+# for $FZF_QUERY. N comes from re-running the same match in --filter mode,
+# which ranks the list the way the interactive fzf just did.
+if [ "$1" = "--remembered-pos" ]; then
+  Q=$(normalize "$FZF_QUERY")
+  [ -n "$Q" ] && [ -f "$memory" ] || exit 0
+  dir=$(Q=$Q awk -F'\t' '$1 == ENVIRON["Q"] { print $2; exit }' "$memory")
+  [ -n "$dir" ] || exit 0
+  n=$(fzf --filter "$FZF_QUERY" < "$2" | grep -nxFm1 -- "$dir" | cut -d: -f1)
+  [ -n "$n" ] && echo "pos($n)"
+  exit 0
+fi
 
 # fzf --tmux defaults to a 50%-wide popup; on narrow clients (phone over SSH) use full width
 popup=--tmux
@@ -14,18 +38,30 @@ popup=--tmux
 # fzf can't detect a light background; colours for the tmux theme (theme.sh)
 colors=--color=$(tmux show -gqv @fzf_colors)
 
-result=$(cat ~/.local/share/fish/dir_history \
-  | sort -u \
+# The list goes to a file so the --remembered-pos hook can rank it too
+list=$(mktemp)
+trap 'rm -f "$list"' EXIT
+sort -u ~/.local/share/fish/dir_history \
   | while IFS= read -r d; do
       expanded="${d/#\~/$HOME}"
       [ -d "$expanded" ] && echo "$d"
-    done \
-  | fzf "$popup" "$colors" --expect=tab --prompt="dir: ")
+    done > "$list"
 
-key=$(echo "$result" | head -1)
-dir=$(echo "$result" | tail -1)
+self=$(realpath "${BASH_SOURCE[0]}")
+result=$(fzf "$popup" "$colors" --expect=tab --print-query --prompt="dir: " \
+  --bind "result:transform:'$self' --remembered-pos '$list'" < "$list")
+
+query=$(normalize "$(sed -n 1p <<< "$result")")
+key=$(sed -n 2p <<< "$result")
+dir=$(sed -n 3p <<< "$result")
 
 [ -z "$dir" ] && exit 0
+
+if [ -n "$query" ]; then
+  { [ -f "$memory" ] && Q=$query awk -F'\t' '$1 != ENVIRON["Q"]' "$memory"
+    printf '%s\t%s\n' "$query" "$dir"
+  } > "$memory.tmp" && mv "$memory.tmp" "$memory"
+fi
 
 if [ "$key" = "tab" ]; then
   expanded_dir="${dir/#\~/$HOME}"
