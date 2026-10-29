@@ -87,8 +87,10 @@ return {
       -- On the `main` branch highlighting is opt-in per buffer; markdown (and the
       -- code blocks inside it) needs it for render-markdown.nvim to look right.
       -- The markdown/markdown_inline parsers ship with Neovim, so no :TSInstall.
+      -- Vala has no Vim syntax file at all, so treesitter is its only highlighting;
+      -- its parser needs `:TSInstall vala` (requires the tree-sitter CLI).
       vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "markdown" },
+        pattern = { "markdown", "vala" },
         callback = function()
           pcall(vim.treesitter.start)
         end,
