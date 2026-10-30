@@ -197,7 +197,8 @@ def draw_tile(a, idx, x, y, w, h, selected):
         badge, color = "", ""
         title = fit(path, max(iw - text_width(num) - 2, 1))
         pad = iw - text_width(num) - text_width(title) - 2
-    name_style = "\x1b[1;97m" if selected else "\x1b[97m"
+    # Default foreground, not bright white: that is the background in the light theme
+    name_style = "\x1b[1m" if selected else ""
     top = (f"{border}{tl}{num}\x1b[0m{name_style} {title} \x1b[0m{border}"
            f"{hz * max(pad, 0)}\x1b[0m{color}{badge}\x1b[0m{border}{hz if badge else ''}{tr}")
 
