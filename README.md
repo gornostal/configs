@@ -50,7 +50,7 @@ the bindings. Notable extras:
 - `scripts/agent_grid.py` (`Alt+a`) — popup grid of the session's Claude Code / Codex
   panes with live previews and needs-you / working / idle badges.
 - `scripts/claude_status.py` — marks tabs that have a working Claude Code session
-  with ✳ (in place of the zoom marker).
+  with ✳ (in place of the zoom marker); `scripts/claude_spin.sh` animates the mark.
 - `scripts/fuzzy_insert_path.sh` (`Alt+c`, `Prefix c`) — fuzzy pick a dir (and file)
   from the fish dir history and insert or `cd` into it; remembers the pick per query.
 - `scripts/join_pane_from_session.sh` (`Prefix j`) — pull a pane in from another session.
