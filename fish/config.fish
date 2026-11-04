@@ -58,16 +58,16 @@ abbr snap-persist 'sudo lvremove /dev/mapper/elementary--vg-snap'
 
 # Docker
 abbr d2p 'set -x DOCKER_HOST (podman info --format "unix://{{.Host.RemoteSocket.Path}}")'
-abbr d 'sudo -E docker'
-abbr di 'sudo docker images'
-abbr dc 'sudo -E docker compose'
-abbr dps 'sudo docker ps'
-abbr dr 'sudo docker run --rm'
-abbr dkrc 'sudo docker kill (sudo docker ps -q)' # kill running containers
-abbr dsc 'sudo docker rm -v (sudo docker ps -a -q -f status=exited)' # delete stopped containers
-abbr ddi 'sudo docker rmi (sudo docker images -q -f dangling=true)' # delete dangling images
-abbr ddv 'sudo docker volume rm (sudo docker volume ls -q -f dangling=true)' # delete dangling volumes
-abbr dst 'sudo docker stats --format "table {{.Name}}\t{{.Container}}\t{{.CPUPerc}}"'
+abbr d 'docker'
+abbr di 'docker images'
+abbr dc 'docker compose'
+abbr dps 'docker ps'
+abbr dr 'docker run --rm'
+abbr dkrc 'docker kill (docker ps -q)' # kill running containers
+abbr dsc 'docker rm -v (docker ps -a -q -f status=exited)' # delete stopped containers
+abbr ddi 'docker rmi (docker images -q -f dangling=true)' # delete dangling images
+abbr ddv 'docker volume rm (docker volume ls -q -f dangling=true)' # delete dangling volumes
+abbr dst 'docker stats --format "table {{.Name}}\t{{.Container}}\t{{.CPUPerc}}"'
 
 # Podman
 abbr p 'podman'
