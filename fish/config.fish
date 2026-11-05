@@ -57,7 +57,6 @@ abbr snap-revert 'sudo lvconvert --merge /dev/mapper/elementary--vg-snap'
 abbr snap-persist 'sudo lvremove /dev/mapper/elementary--vg-snap'
 
 # Docker
-abbr d2p 'set -x DOCKER_HOST (podman info --format "unix://{{.Host.RemoteSocket.Path}}")'
 abbr d 'docker'
 abbr di 'docker images'
 abbr dc 'docker compose'
@@ -68,10 +67,6 @@ abbr dsc 'docker rm -v (docker ps -a -q -f status=exited)' # delete stopped cont
 abbr ddi 'docker rmi (docker images -q -f dangling=true)' # delete dangling images
 abbr ddv 'docker volume rm (docker volume ls -q -f dangling=true)' # delete dangling volumes
 abbr dst 'docker stats --format "table {{.Name}}\t{{.Container}}\t{{.CPUPerc}}"'
-
-# Podman
-abbr p 'podman'
-abbr pc 'podman compose'
 
 # kubens autocompletion
 abbr k 'kubectl'
