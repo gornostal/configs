@@ -54,7 +54,8 @@ the bindings. Notable extras:
 - `scripts/fuzzy_insert_path.sh` (`Alt+c`, `Prefix c`) — fuzzy pick a dir (and file)
   from the fish dir history and insert or `cd` into it; remembers the pick per query.
 - `scripts/join_pane_from_session.sh` (`Prefix j`) — pull a pane in from another session.
-- `scripts/ram_status.sh` — RAM usage in the status bar.
+- `scripts/ram_status.sh`, `load_status.sh` — RAM usage and load average in the status
+  bar, highlighted when high.
 - `scripts/theme.sh` — light/dark theme: follows the terminal (kitty follows the
   desktop), or forced by the toggle at the end of the status bar (e.g. for Termius).
   `nvim_background.sh` switches running Neovims, which don't follow on their own.
