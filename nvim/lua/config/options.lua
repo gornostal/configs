@@ -33,5 +33,18 @@ opt.undofile = true
 opt.updatetime = 250
 opt.timeoutlen = 1000
 
+-- Reload files changed on disk (e.g. by an agent in another pane). 'autoread' alone
+-- only acts once Neovim checks, so check on focus/buffer enter and when idle.
+-- FocusGained needs `focus-events on` in tmux.
+opt.autoread = true
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+  group = vim.api.nvim_create_augroup("reload_changed_files", { clear = true }),
+  callback = function()
+    if vim.fn.getcmdwintype() == "" then
+      vim.cmd("checktime")
+    end
+  end,
+})
+
 -- Completion
 opt.completeopt = "menu,menuone,noselect"
