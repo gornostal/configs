@@ -11,7 +11,7 @@ a #() job in status-right, which re-runs it every status-interval.
 Source of truth is ~/.claude/sessions/<pid>.json, which every interactive
 session keeps up to date (same approach as ~/projects/cc-busy-indicator):
   status  busy     model/tool loop is running        -> working
-          shell    user dropped into a shell (!cmd)  -> working
+          shell    user dropped into a shell (!cmd)
           waiting  blocked on a permission/question
           idle     sitting at the prompt
   tmux    "<session>:@<window>.%<pane>" at launch; only the pane id is used,
@@ -25,7 +25,7 @@ import os
 import subprocess
 import sys
 
-WORKING = {"busy", "shell"}
+WORKING = {"busy"}
 
 
 def proc_start(pid):
