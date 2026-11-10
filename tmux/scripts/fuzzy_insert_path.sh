@@ -36,7 +36,7 @@ fi
 popup=--tmux
 [ "$(tmux display -p '#{client_width}')" -lt 100 ] && popup=--tmux=center,100%,50%
 # fzf can't detect a light background; colours for the tmux theme (theme.sh)
-colors=--color=$(tmux show -gqv @fzf_colors)
+colors=--color=$(tmux display -p '#{@fzf_colors}')
 
 # The list goes to a file so the --remembered-pos hook can rank it too
 list=$(mktemp)
