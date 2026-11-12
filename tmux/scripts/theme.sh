@@ -135,7 +135,10 @@ case $1 in
         apply_group "$2" "$mode" | tmux source-file - ;;
     # A new window or group member only takes on the group's theme; Neovims are left
     # alone, as one only moves between themes by moving a window between groups.
+    # new -t first spawns a window of its own, then swaps it for the group's: the hook
+    # also fires for that one, gone by now (tmux would show "returned 1").
     window)
+        tmux list-panes -t "$3" >/dev/null 2>&1 || exit 0
         apply_window "$3" "$(group_mode "$2")" | tmux source-file -
         exit ;;
     session)
